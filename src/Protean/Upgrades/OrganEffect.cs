@@ -14,26 +14,36 @@ namespace Protean
 
         public override void Apply(Pawn pawn)
         {
-            IEnumerable<BodyPartRecord> targetParts = pawn.health.hediffSet.GetNotMissingParts()
-                .Where(part => part.def == targetOrgan);
-
-            if (isAddition)
+            if (addedParts.Any())
             {
-                BodyPartRecord randomParent = targetParts.RandomElement();
-                if (randomParent != null)
-                {
-                    var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, randomParent);
-                    pawn.health.AddHediff(hediff, randomParent);
-                    addedParts.Add(hediff);
-                }
+                // If tracked parts are missing, remove them from our list
+                addedParts.RemoveAll(part => part == null || !pawn.health.hediffSet.HasHediff(part.def));
             }
-            else
+
+            // Only add new parts
+            if (!addedParts.Any())
             {
-                foreach (BodyPartRecord part in targetParts)
+                IEnumerable<BodyPartRecord> targetParts = pawn.health.hediffSet.GetNotMissingParts()
+                    .Where(part => part.def == targetOrgan);
+
+                if (isAddition)
                 {
-                    var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, part);
-                    pawn.health.AddHediff(hediff, part);
-                    addedParts.Add(hediff);
+                    BodyPartRecord randomParent = targetParts.RandomElement();
+                    if (randomParent != null)
+                    {
+                        var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, randomParent);
+                        pawn.health.AddHediff(hediff, randomParent);
+                        addedParts.Add(hediff);
+                    }
+                }
+                else
+                {
+                    foreach (BodyPartRecord part in targetParts)
+                    {
+                        var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, part);
+                        pawn.health.AddHediff(hediff, part);
+                        addedParts.Add(hediff);
+                    }
                 }
             }
         }

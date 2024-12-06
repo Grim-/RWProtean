@@ -14,10 +14,17 @@ namespace Protean
             if (pawn.abilities == null)
                 pawn.abilities = new Pawn_AbilityTracker(pawn);
 
+            // Remove any tracked abilities that no longer exist
+            grantedAbilities.RemoveAll(ability => ability == null || !pawn.abilities.abilities.Contains(ability));
+
+            // Add any abilities from our list that we haven't already granted
             foreach (var abilityDef in abilities)
             {
+                if (!grantedAbilities.Any(a => a.def == abilityDef))
+                {
                     pawn.abilities.GainAbility(abilityDef);
                     grantedAbilities.Add(pawn.abilities.GetAbility(abilityDef));
+                }
             }
         }
 

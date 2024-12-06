@@ -10,11 +10,8 @@ namespace Protean
         public List<UpgradeTreeNodeDef> nodes;
         public IntVec2 dimensions;
         public Type handlerClass;
-
-        public BaseTreeHandler CreateHandler(Pawn pawn)
-        {
-            return (BaseTreeHandler)Activator.CreateInstance(handlerClass, new object[] { pawn, this });
-        }
+        public List<UpgradePathDef> availablePaths;
+        public TreeDisplayStrategyDef displayStrategy;
 
         public List<UpgradeTreeNodeDef> GetAllNodes()
         {
@@ -28,7 +25,7 @@ namespace Protean
             while (toProcess.Count > 0)
             {
                 var node = toProcess.Dequeue();
-                if (allNodes.Add(node))  // If this node hasn't been processed yet
+                if (allNodes.Add(node))
                 {
                     if (!node.connections.NullOrEmpty())
                     {

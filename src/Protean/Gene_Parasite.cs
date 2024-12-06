@@ -10,23 +10,25 @@ namespace Protean
     {
         private Dictionary<UpgradeDef, List<UpgradeEffect>> activeEffects =
                     new Dictionary<UpgradeDef, List<UpgradeEffect>>();
-        private HashSet<UpgradeDef> unlockedUpgrades = new HashSet<UpgradeDef>();
-        private HashSet<UpgradePathDef> chosenPaths = new HashSet<UpgradePathDef>();
 
-        private PassiveTreeHandler passiveTree;
-        private ActiveTreeHandler activeTree;
+
+        private HashSet<UpgradeDef> unlockedUpgrades = new HashSet<UpgradeDef>();
+        private HashSet<UpgradePathDef> selectedPassivePaths = new HashSet<UpgradePathDef>();
+        private HashSet<UpgradePathDef> selectedActivePaths = new HashSet<UpgradePathDef>();
+
+        public PassiveTreeHandler passiveTree;
+        public ActiveTreeHandler activeTree;
 
         private const int MaxParasiteLevel = 300;
         private const int MaxBondLevel = 20;
         private const float BaseBond = 100f;
-        private const float BondingPerHour = 0.1f;
+        private const float BondingPerHour = 1f;
 
         private int parasiteLevel = 1;
         private int bondLevel = 0;
         private float currentLevelBond = 0f;
         private int evolutionPoints = 0;
 
-        // Properties for external access
         public int ParasiteLevel => parasiteLevel;
         public int BondLevel => bondLevel;
         public float CurrentBondProgress => currentLevelBond / MaxBondPerLevel(bondLevel);
@@ -36,67 +38,53 @@ namespace Protean
         public override void PostMake()
         {
             base.PostMake();
-            passiveTree = new PassiveTreeHandler(pawn, ProteanDefOf.BasicParasiteTree);
-            activeTree = new ActiveTreeHandler(pawn, ProteanDefOf.BasicParasiteTree);
-        }
-        public void OpenPassiveTree()
-        {
-            var window = new ParasiteTreeUI(this, ProteanDefOf.BasicParasiteTree, passiveTree);
-            Find.WindowStack.Add(window);
-        }
-
-        public void OpenActiveTree()
-        {
-            var window = new ParasiteTreeUI(this, ProteanDefOf.BasicParasiteTree, activeTree);
-            Find.WindowStack.Add(window);
-        }
-
-        public override void ExposeData()
-        {
-            base.ExposeData();
-
-            passiveTree?.ExposeData();
-            activeTree?.ExposeData();
-
-            Scribe_Collections.Look(ref unlockedUpgrades, "unlockedUpgrades", LookMode.Def);
-            Scribe_Values.Look(ref parasiteLevel, "parasiteLevel", 1);
-            Scribe_Values.Look(ref bondLevel, "bondLevel", 0);
-            Scribe_Values.Look(ref currentLevelBond, "currentLevelBond", 0f);
-            Scribe_Values.Look(ref evolutionPoints, "evolutionPoints", 0);
-
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
-            {
-                activeEffects.Clear();
-                foreach (var upgrade in unlockedUpgrades)
-                {
-                    UnlockUpgrade(upgrade);
-                }
-            }
+            passiveTree = new PassiveTreeHandler(pawn, this, ProteanDefOf.Passive_BasicParasiteTree);
+            activeTree = new ActiveTreeHandler(pawn, this, ProteanDefOf.Active_BasicParasiteTree);
         }
 
         public override void Tick()
         {
             base.Tick();
 
-            // Increase bond every hour (6000 ticks)
             if (pawn.IsHashIntervalTick(6000))
             {
                 IncreaseBond(BondingPerHour);
             }
         }
+        public void OpenPassiveTree()
+        {
+            var window = new ParasiteTreeUI(this, ProteanDefOf.Passive_BasicParasiteTree, passiveTree, ProteanDefOf.Passive_BasicParasiteTree.displayStrategy);
+            Find.WindowStack.Add(window);
+        }
+
+        public void OpenActiveTree()
+        {
+            var window = new ParasiteTreeUI(this, ProteanDefOf.Active_BasicParasiteTree, activeTree, ProteanDefOf.Active_BasicParasiteTree.displayStrategy);
+            Find.WindowStack.Add(window);
+        }
 
         private void IncreaseBond(float amount)
         {
             if (bondLevel >= MaxBondLevel) return;
-
             currentLevelBond += amount;
             float maxBond = MaxBondPerLevel(bondLevel);
 
-            while (currentLevelBond >= maxBond && bondLevel < MaxBondLevel)
+            int levelsToGain = 0;
+            float remainingBond = currentLevelBond;
+            int tempLevel = bondLevel;
+
+            while (remainingBond >= maxBond && tempLevel < MaxBondLevel)
             {
-                currentLevelBond -= maxBond;
-                GainBondLevel(1);
-                maxBond = MaxBondPerLevel(bondLevel);
+                remainingBond -= maxBond;
+                tempLevel++;
+                levelsToGain++;
+                maxBond = MaxBondPerLevel(tempLevel);
+            }
+
+            if (levelsToGain > 0)
+            {
+                currentLevelBond = remainingBond;
+                GainBondLevel(levelsToGain);
             }
         }
 
@@ -105,14 +93,16 @@ namespace Protean
             int oldLevel = bondLevel;
             bondLevel = Math.Min(bondLevel + levels, MaxBondLevel);
 
-            // Update passive tree and grant points for active tree
-            passiveTree.OnLevelUp(bondLevel);
-            activeTree.AddPoints(levels); // Each bond level grants 1 point
-        }
+            if (passiveTree != null)
+            {
+                passiveTree.OnLevelUp(bondLevel);
+            }
+            if (activeTree != null)
+            {
+                activeTree.AddPoints(levels);
+            }
 
-        private void OnBondLevelGained(int newLevel)
-        {
-            evolutionPoints++;
+            Messages.Message($"{pawn.Label} gained {levels} bond level{(levels > 1 ? "s" : "")} with their parasite (level = {bondLevel})", MessageTypeDefOf.PositiveEvent);
         }
 
         public bool CanAffordUpgrade(UpgradeDef upgrade)
@@ -125,28 +115,6 @@ namespace Protean
             return evolutionPoints >= amount;
         }
 
-        public void UnlockUpgrade(UpgradeDef upgrade)
-        {
-            if (unlockedUpgrades.Contains(upgrade) || !CanAffordUpgrade(upgrade))
-                return;
-
-            UseEvolutionPoints(upgrade.pointCost);
-
-            if (!activeEffects.ContainsKey(upgrade))
-            {
-                activeEffects[upgrade] = new List<UpgradeEffect>();
-                foreach (var effectDef in upgrade.effects)
-                {
-                    var effect = effectDef.CreateEffect();
-                    effect.Apply(pawn);
-                    activeEffects[upgrade].Add(effect);
-                }
-            }
-            unlockedUpgrades.Add(upgrade);
-
-            Messages.Message($"{pawn.Label} unlocked {upgrade.defName}", MessageTypeDefOf.PositiveEvent);
-        }
-
         private void UseEvolutionPoints(int amount)
         {
             if (HasEvolutionPoints(amount))
@@ -157,11 +125,6 @@ namespace Protean
 
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            //foreach (var item in base.GetGizmos())
-            //{
-            //    yield return item;
-            //}
-
             yield return new Command_Action
             {
                 defaultLabel = "DEV: Increase Bond Level",
@@ -174,60 +137,31 @@ namespace Protean
             {
                 defaultLabel = "DEV: Increase Bond Progress",
                 defaultDesc = "Increase Bond Progress to 100%",
-                action = () => IncreaseBond(MaxBondPerLevel(BondLevel) - CurrentBondProgress),
+                action = () => IncreaseBond(MaxBondPerLevel(BondLevel) - CurrentBondProgress - 0.1f),
 
             };
         }
 
 
-        #region Upgrade Tree Node Methods
-        //public void UnlockUpgrade(UpgradeDef upgrade)
-        //{
-        //    if (!activeEffects.ContainsKey(upgrade))
-        //    {
-        //        activeEffects[upgrade] = new List<UpgradeEffect>();
-        //        foreach (var effectDef in upgrade.effects)
-        //        {
-        //            var effect = effectDef.CreateEffect();
-        //            effect.Apply(pawn);
-        //            activeEffects[upgrade].Add(effect);
-        //        }
-        //    }
-        //    unlockedUpgrades.Add(upgrade);
-        //}
-
-        public bool CanUnlockNode(UpgradeTreeNodeDef node)
+        public override void ExposeData()
         {
-            if (node.type == UpgradeTreeNodeDef.NodeType.Start) return true;
-            if (node.connections == null || node.connections.Count <= 0) return true;
-            if (IsNodeUnlocked(node)) return false;
+            base.ExposeData();
 
-            if (node.path != null)
+            Scribe_Deep.Look(ref passiveTree, "passiveTree");
+            Scribe_Deep.Look(ref activeTree, "activeTree");
+
+            Scribe_Collections.Look(ref unlockedUpgrades, "unlockedUpgrades", LookMode.Def);
+            Scribe_Values.Look(ref parasiteLevel, "parasiteLevel", 1);
+            Scribe_Values.Look(ref bondLevel, "bondLevel", 0);
+            Scribe_Values.Look(ref currentLevelBond, "currentLevelBond", 0f);
+            Scribe_Values.Look(ref evolutionPoints, "evolutionPoints", 0);
+            Scribe_Collections.Look(ref selectedPassivePaths, "selectedPassivePaths", LookMode.Def);
+            Scribe_Collections.Look(ref selectedActivePaths, "selectedActivePaths", LookMode.Def);
+
+            if (Scribe.mode == LoadSaveMode.LoadingVars)
             {
-                if (chosenPaths.Any(p =>
-                    p.exclusiveWith != null &&
-                    p.exclusiveWith.Contains(node.path)))
-                {
-                    return false;
-                }
+                activeEffects.Clear();
             }
-
-            bool hasUnlockedConnection = node.connections.Any(connection =>
-                IsNodeUnlocked(connection));
-            bool meetsLevelRequirement = true;
-            if (node.upgrade != null)
-            {
-                meetsLevelRequirement = ParasiteLevel >= node.upgrade.parasiteLevelRequired;
-            }
-
-            return hasUnlockedConnection && meetsLevelRequirement;
         }
-
-        public bool IsNodeUnlocked(UpgradeTreeNodeDef node)
-        {
-            return node.upgrade == null || unlockedUpgrades.Contains(node.upgrade);
-        }
-
-        #endregion
     }
 }

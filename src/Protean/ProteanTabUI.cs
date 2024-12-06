@@ -12,16 +12,17 @@ namespace Protean
         const float buttonWidth = 100f;
         const float levelWidth = 80f;
         const float progressWidth = 100f;
+        Vector2 tabSize = new Vector2(500, 400);
 
         public ProteanTabUI()
         {
             labelKey = "Parasite";
-            size = new Vector2(500, 400);
+            size = tabSize;
         }
 
         protected override void FillTab()
         {
-            var rect = new Rect(0, 0, 500, 600);
+            var rect = new Rect(0, 0, tabSize.x, tabSize.y);
             var toolbarHeight = 35f;
             var toolbarRect = rect.TopPartPixels(toolbarHeight);
 
@@ -47,7 +48,12 @@ namespace Protean
             // Parasite Level with bg  
             var parasiteLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
             Widgets.DrawHighlight(parasiteLabelRect);
-            Widgets.Label(parasiteLabelRect, $"Level: {Parasite.ParasiteLevel}");
+            Widgets.Label(parasiteLabelRect, $"Parasite Level: {Parasite.ParasiteLevel}");
+            curX += levelWidth + padding;
+
+            var evoPointsLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
+            Widgets.DrawHighlight(evoPointsLabelRect);
+            Widgets.Label(evoPointsLabelRect, $"Evolution Points: {Parasite.EvolutionPoints}");
             curX += levelWidth + padding;
 
             Text.Anchor = TextAnchor.UpperLeft;

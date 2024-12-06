@@ -3,24 +3,19 @@ using UnityEngine;
 
 namespace Protean
 {
-    public class VerticalTreeStrategy : ITreeDisplayStrategy
+    public class ConcentricRingStrategy : ITreeDisplayStrategy
     {
-        private const float START_NODE_SPACING = 20f; // Space between multiple start nodes
+        private readonly float ringSpacing = 40f; // Space between rings
+        private readonly float nodePadding = 20f;
 
-        private readonly bool bottomToTop = true;
-        private readonly float horizontalPadding;
-        private readonly float verticalPadding;
-
-        public VerticalTreeStrategy()
+        public ConcentricRingStrategy()
         {
-
         }
 
-        public VerticalTreeStrategy(bool startFromBottom = true, float horizontalPadding = 80f, float verticalPadding = 30f)
+        public ConcentricRingStrategy(float ringSpacing = 100f, float nodePadding = 20f)
         {
-            bottomToTop = startFromBottom;
-            this.horizontalPadding = horizontalPadding;
-            this.verticalPadding = verticalPadding;
+            this.ringSpacing = ringSpacing;
+            this.nodePadding = nodePadding;
         }
 
         public Dictionary<UpgradeTreeNodeDef, Rect> PositionNodes(
@@ -32,23 +27,24 @@ namespace Protean
             if (nodes == null || nodes.Count == 0)
                 return new Dictionary<UpgradeTreeNodeDef, Rect>();
 
-            // Create a padded workspace
-            var paddedSpace = new Rect(
-                availableSpace.x + horizontalPadding,
-                availableSpace.y + verticalPadding,
-                availableSpace.width - (horizontalPadding * 2),
-                availableSpace.height - (verticalPadding * 2)
-            );
-
             var nodePositions = new Dictionary<UpgradeTreeNodeDef, Rect>();
             var pathGroups = GroupNodesByPath(nodes);
             var startNodes = FindStartNodes(nodes);
 
-            // Position start nodes from the center
-            PositionStartNodes(startNodes, nodePositions, paddedSpace, nodeSize);
+            // Calculate center point of available space
+            Vector2 center = new Vector2(
+                availableSpace.x + (availableSpace.width / 2),
+                availableSpace.y + (availableSpace.height / 2)
+            );
 
-            // Position path nodes distributed evenly
-            PositionPaths(pathGroups, nodePositions, paddedSpace, nodeSize, spacing);
+            // Position start nodes in the center
+            PositionStartNodes(startNodes, nodePositions, center, nodeSize);
+
+            // Calculate first ring radius based on available space
+            float firstRingRadius = Mathf.Min(availableSpace.width, availableSpace.height) * 0.2f;
+
+            // Position paths in concentric rings
+            PositionPathRings(pathGroups, nodePositions, center, firstRingRadius, nodeSize);
 
             return nodePositions;
         }
@@ -56,100 +52,77 @@ namespace Protean
         private void PositionStartNodes(
             List<UpgradeTreeNodeDef> startNodes,
             Dictionary<UpgradeTreeNodeDef, Rect> nodePositions,
-            Rect paddedSpace,
+            Vector2 center,
             float nodeSize)
         {
             if (startNodes.Count == 0) return;
 
-            float startY = bottomToTop ? paddedSpace.height : paddedSpace.y;
-            float centerX = paddedSpace.x + (paddedSpace.width / 2);
-
             if (startNodes.Count == 1)
             {
-                // Single start node goes in the center
+                // Single start node goes in the exact center
                 nodePositions[startNodes[0]] = new Rect(
-                    centerX - (nodeSize / 2),
-                    startY,
+                    center.x - (nodeSize / 2),
+                    center.y - (nodeSize / 2),
                     nodeSize,
                     nodeSize);
             }
             else
             {
-                // Multiple start nodes spread from center
-                float totalWidth = (startNodes.Count * nodeSize) + ((startNodes.Count - 1) * START_NODE_SPACING);
-                float startX = centerX - (totalWidth / 2);
+                // Multiple start nodes form a tiny ring in the center
+                float innerRadius = nodeSize;
+                float angleStep = 360f / startNodes.Count;
 
                 for (int i = 0; i < startNodes.Count; i++)
                 {
-                    float x = startX + (i * (nodeSize + START_NODE_SPACING));
-                    nodePositions[startNodes[i]] = new Rect(x, startY, nodeSize, nodeSize);
+                    float angle = i * angleStep * Mathf.Deg2Rad;
+                    Vector2 position = new Vector2(
+                        center.x + (innerRadius * Mathf.Cos(angle)),
+                        center.y + (innerRadius * Mathf.Sin(angle))
+                    );
+
+                    nodePositions[startNodes[i]] = new Rect(
+                        position.x - (nodeSize / 2),
+                        position.y - (nodeSize / 2),
+                        nodeSize,
+                        nodeSize);
                 }
             }
         }
 
-
-        private void PositionPaths(
+        private void PositionPathRings(
             Dictionary<string, List<UpgradeTreeNodeDef>> pathGroups,
             Dictionary<UpgradeTreeNodeDef, Rect> nodePositions,
-            Rect paddedSpace,
-            float nodeSize,
-            float spacing)
-        {
-            int pathCount = pathGroups.Count;
-            if (pathCount == 0) return;
-
-            float pathSpacing = pathCount > 1 ? paddedSpace.width / (pathCount - 1) : 0;
-
-            int maxPathLength = GetMaxPathLength(pathGroups);
-            float startY = bottomToTop ? paddedSpace.height : paddedSpace.y;
-            float verticalStep = paddedSpace.height / (maxPathLength + 1);
-
-            int pathIndex = 0;
-            foreach (var path in pathGroups)
-            {
-                float pathX;
-                if (pathCount == 1)
-                {
-                    // Single path goes in the center
-                    pathX = paddedSpace.x + (paddedSpace.width / 2);
-                }
-                else
-                {
-                    // Multiple paths are distributed evenly
-                    pathX = paddedSpace.x + (pathIndex * pathSpacing);
-                }
-
-                // Center the nodes on the path
-                pathX -= nodeSize / 2;
-
-                var orderedNodes = OrderByConnections(path.Value);
-                PositionNodesInPath(
-                    orderedNodes,
-                    nodePositions,
-                    pathX,
-                    startY,
-                    verticalStep,
-                    nodeSize);
-
-                pathIndex++;
-            }
-        }
-
-        private void PositionNodesInPath(
-            List<UpgradeTreeNodeDef> pathNodes,
-            Dictionary<UpgradeTreeNodeDef, Rect> nodePositions,
-            float pathX,
-            float startY,
-            float verticalStep,
+            Vector2 center,
+            float firstRingRadius,
             float nodeSize)
         {
-            for (int i = 0; i < pathNodes.Count; i++)
+            int ringIndex = 1;
+            foreach (var path in pathGroups)
             {
-                float y = bottomToTop
-                    ? startY - ((i + 1) * verticalStep)
-                    : startY + ((i + 1) * verticalStep);
+                float ringRadius = firstRingRadius + ((ringIndex - 1) * ringSpacing);
+                var orderedNodes = OrderByConnections(path.Value);
 
-                nodePositions[pathNodes[i]] = new Rect(pathX, y, nodeSize, nodeSize);
+                // Calculate angle step based on number of nodes and minimum padding
+                float totalAngleNeeded = orderedNodes.Count * nodePadding;
+                float angleStep = Mathf.Max(360f / orderedNodes.Count, totalAngleNeeded / orderedNodes.Count);
+
+                // Position nodes around the ring
+                for (int i = 0; i < orderedNodes.Count; i++)
+                {
+                    float angle = i * angleStep * Mathf.Deg2Rad;
+                    Vector2 position = new Vector2(
+                        center.x + (ringRadius * Mathf.Cos(angle)),
+                        center.y + (ringRadius * Mathf.Sin(angle))
+                    );
+
+                    nodePositions[orderedNodes[i]] = new Rect(
+                        position.x - (nodeSize / 2),
+                        position.y - (nodeSize / 2),
+                        nodeSize,
+                        nodeSize);
+                }
+
+                ringIndex++;
             }
         }
 
@@ -169,16 +142,6 @@ namespace Protean
                 groups[key].Add(node);
             }
             return groups;
-        }
-
-        private int GetMaxPathLength(Dictionary<string, List<UpgradeTreeNodeDef>> pathGroups)
-        {
-            int max = 0;
-            foreach (var group in pathGroups.Values)
-            {
-                max = Mathf.Max(max, group.Count);
-            }
-            return max;
         }
 
         private List<UpgradeTreeNodeDef> OrderByConnections(List<UpgradeTreeNodeDef> nodes)

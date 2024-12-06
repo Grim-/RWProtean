@@ -9,8 +9,17 @@ namespace Protean
 
         public override void Apply(Pawn pawn)
         {
-            appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
-            pawn.health.AddHediff(appliedHediff);
+            if (appliedHediff != null && !pawn.health.hediffSet.HasHediff(hediffDef))
+            {
+                appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
+                pawn.health.AddHediff(appliedHediff);
+            }
+            // If we have no saved reference at all
+            else if (appliedHediff == null)
+            {
+                appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
+                pawn.health.AddHediff(appliedHediff);
+            }
         }
 
         public override void Remove(Pawn pawn)

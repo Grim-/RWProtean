@@ -83,13 +83,16 @@
   <ItemGroup>
     <Compile Include="ActiveTreeHandler.cs" />
     <Compile Include="BaseTreeHandler.cs" />
+    <Compile Include="ConcentricRingStrategy.cs" />
+    <Compile Include="ForceDirectedStrategy.cs" />
     <Compile Include="ITreeDisplayStrategy.cs" />
     <Compile Include="PassiveTreeHandler.cs" />
+    <Compile Include="UnlockResult.cs" />
     <Compile Include="Upgrades\AbilityEffect.cs" />
     <Compile Include="Upgrades\AbilityEffectDef.cs" />
     <Compile Include="Upgrades\HediffEffectDef.cs" />
     <Compile Include="Upgrades\OrganEffectDef.cs" />
-    <Compile Include="Tree\UpgradeEffect.cs" />
+    <Compile Include="Upgrades\UpgradeEffect.cs" />
     <Compile Include="Gene_Parasite.cs" />
     <Compile Include="Upgrades\HediffEffect.cs" />
     <Compile Include="Upgrades\OrganEffect.cs" />
@@ -102,6 +105,7 @@
     <Compile Include="ProteanDefOf.cs" />
     <Compile Include="ProteanTabUI.cs" />
     <Compile Include="Tree\UpgradePathDef.cs" />
+    <Compile Include="UpgradeUnlockError.cs" />
     <Compile Include="VerticalTreeStrategy.cs" />
   </ItemGroup>
   <ItemGroup>

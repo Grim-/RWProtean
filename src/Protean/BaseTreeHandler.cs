@@ -1,54 +1,133 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
 namespace Protean
 {
-    public abstract class BaseTreeHandler
+    public abstract class BaseTreeHandler : IExposable
     {
-        protected Dictionary<UpgradeDef, List<UpgradeEffect>> activeEffects =
-            new Dictionary<UpgradeDef, List<UpgradeEffect>>();
-        protected HashSet<UpgradeDef> unlockedUpgrades = new HashSet<UpgradeDef>();
-        protected HashSet<UpgradePathDef> chosenPaths = new HashSet<UpgradePathDef>();
-
         protected Pawn pawn;
+        protected Gene_Parasite gene;
         protected UpgradeTreeDef treeDef;
+        protected HashSet<UpgradeDef> unlockedUpgrades;
+        protected HashSet<UpgradeTreeNodeDef> unlockedNodes;
+        protected Dictionary<UpgradeDef, List<UpgradeEffect>> activeEffects;
+        protected HashSet<UpgradePathDef> selectedPaths;
 
-        public BaseTreeHandler(Pawn pawn, UpgradeTreeDef treeDef)
+        protected BaseTreeHandler()
+        {
+        }
+
+        public BaseTreeHandler(Pawn pawn, Gene_Parasite gene, UpgradeTreeDef treeDef)
         {
             this.pawn = pawn;
+            this.gene = gene;
             this.treeDef = treeDef;
+            this.unlockedUpgrades = new HashSet<UpgradeDef>();
+            this.unlockedNodes = new HashSet<UpgradeTreeNodeDef>();
+            this.activeEffects = new Dictionary<UpgradeDef, List<UpgradeEffect>>();
+            this.selectedPaths = new HashSet<UpgradePathDef>();
+
+            if (Scribe.mode != LoadSaveMode.LoadingVars)
+            {
+                UnlockStartNode();
+            }
         }
 
-        public virtual bool CanUnlockNode(UpgradeTreeNodeDef node)
-        {
-            if (node.type == UpgradeTreeNodeDef.NodeType.Start) return true;
-            if (node.connections == null || node.connections.Count <= 0) return true;
-            if (IsNodeUnlocked(node)) return false;
+        public bool IsPathSelected(UpgradePathDef path) => selectedPaths.Contains(path);
 
-            if (node.path != null && chosenPaths.Any(p =>
-                p.exclusiveWith != null &&
-                p.exclusiveWith.Contains(node.path)))
-            {
+        public virtual bool CanSelectPath(UpgradePathDef path)
+        {
+            if (path == null) return false;
+
+            // Check if the path is already selected
+            if (selectedPaths.Contains(path)) 
                 return false;
+
+            return !path.IsPathExclusiveWith(selectedPaths);
+        }
+
+        public virtual bool HasSelectedAPath()
+        {
+            return selectedPaths != null && selectedPaths.Count > 0;
+        }
+
+        public virtual UnlockResult SelectPath(UpgradePathDef path)
+        {
+            if (!CanSelectPath(path))
+            {
+                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, $"Cannot select this path defName={path.defName}");
             }
 
-            return node.connections.Any(connection => IsNodeUnlocked(connection));
+            selectedPaths.Add(path);
+            OnPathSelected(path);
+            return UnlockResult.Succeeded();
         }
 
-        public virtual bool IsNodeUnlocked(UpgradeTreeNodeDef node)
+        protected virtual UnlockResult ValidateUnlock(UpgradeTreeNodeDef node)
         {
-            return node.upgrade == null || unlockedUpgrades.Contains(node.upgrade);
+            if (node == null)
+            {
+                return UnlockResult.Failed(UpgradeUnlockError.InvalidNode, "Invalid upgrade node");
+            }
+
+            if (IsNodeUnlocked(node))
+            {
+                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "This upgrade is already unlocked");
+            }
+
+            if (node.type == UpgradeTreeNodeDef.NodeType.Start)
+            {
+                return UnlockResult.Succeeded();
+            }
+
+            if (node.type != UpgradeTreeNodeDef.NodeType.Start)
+            {
+                bool hasUnlockedPredecessor = node.GetPredecessors(treeDef).Any(IsNodeUnlocked);
+                if (!hasUnlockedPredecessor)
+                {
+                    return UnlockResult.Failed(UpgradeUnlockError.NoPrecedingNode, "Requires a previous upgrade to be unlocked first");
+                }
+            }
+
+            if (!ValidateUpgradePath(node.path))
+            {
+                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath,
+                    "Cannot unlock - This node belongs to a path you haven't selected");
+            }
+
+            return UnlockResult.Succeeded();
         }
 
-        protected virtual void UnlockUpgrade(UpgradeDef upgrade)
+        public bool IsNodeUnlocked(UpgradeTreeNodeDef node)
+        {
+            return node != null && unlockedNodes.Contains(node);
+        }
+
+        public virtual void UnlockStartNode()
+        {
+            Log.Message($"Unlocking Starting Node...");
+            if (this.treeDef.nodes != null)
+            {
+                foreach (var item in this.treeDef.GetAllNodes())
+                {
+                    if (item.type == UpgradeTreeNodeDef.NodeType.Start && !IsNodeUnlocked(item))
+                    {
+                        UnlockNode(item);
+                    }
+                }
+            }
+        }
+
+        public virtual void UnlockUpgrade(UpgradeDef upgrade)
         {
             if (!activeEffects.ContainsKey(upgrade))
             {
                 activeEffects[upgrade] = new List<UpgradeEffect>();
-                foreach (var effectDef in upgrade.effects)
+                var effects = upgrade.CreateEffects();
+                foreach (var effect in effects)
                 {
-                    var effect = effectDef.CreateEffect();
                     effect.Apply(pawn);
                     activeEffects[upgrade].Add(effect);
                 }
@@ -56,18 +135,63 @@ namespace Protean
             unlockedUpgrades.Add(upgrade);
         }
 
+        protected void UnlockNode(UpgradeTreeNodeDef node)
+        {
+            if (node != null && node.upgrade != null)
+            {
+                UnlockUpgrade(node.upgrade);
+                unlockedNodes.Add(node);
+            }
+        }
+
+
+        public virtual UnlockResult CanUnlockNode(UpgradeTreeNodeDef node)
+        {
+            UnlockResult baseResult = ValidateUnlock(node);
+            if (!baseResult.Success)
+            {
+                return baseResult;
+            }
+
+            return ValidateTypeSpecificRules(node);
+        }
+
+        protected abstract UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node);
+        public abstract void OnPathSelected(UpgradePathDef path);
+        public abstract bool ValidateUpgradePath(UpgradePathDef path);
+
         public virtual void ExposeData()
         {
+            // Save/load basic references
+            Scribe_References.Look(ref pawn, "pawn");
+            Scribe_References.Look(ref gene, "gene");
             Scribe_Defs.Look(ref treeDef, "treeDef");
-            Scribe_Collections.Look(ref unlockedUpgrades, "unlockedUpgrades", LookMode.Def);
-            Scribe_Collections.Look(ref chosenPaths, "chosenPaths", LookMode.Def);
 
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
+            Scribe_Collections.Look(ref unlockedUpgrades, "unlockedUpgrades", LookMode.Def);
+            Scribe_Collections.Look(ref unlockedNodes, "unlockedNodes", LookMode.Def);
+            Scribe_Collections.Look(ref selectedPaths, "selectedPaths", LookMode.Def);
+
+            Scribe_Collections.Look(
+                ref activeEffects,
+                "activeEffects",
+                LookMode.Def,    
+                LookMode.Deep
+            );
+
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                activeEffects.Clear();
-                foreach (var upgrade in unlockedUpgrades)
+                if (unlockedUpgrades != null) unlockedUpgrades = new HashSet<UpgradeDef>(unlockedUpgrades);
+                if (unlockedNodes != null) unlockedNodes = new HashSet<UpgradeTreeNodeDef>(unlockedNodes);
+                if (selectedPaths != null)
                 {
-                    UnlockUpgrade(upgrade);
+                    // Store the paths first
+                    selectedPaths = new HashSet<UpgradePathDef>(selectedPaths);
+                    // Then reselect each path to trigger their effects
+                    foreach (var path in selectedPaths)
+                    {
+                        OnPathSelected(path);
+                    }
                 }
             }
         }

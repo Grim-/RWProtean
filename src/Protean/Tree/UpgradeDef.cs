@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using Verse;
 
 namespace Protean
@@ -7,8 +8,54 @@ namespace Protean
     {
         public int parasiteLevelRequired;
         public List<UpgradeDef> prerequisites;
-        public List<UpgradeEffectDef> effects;
         public string uiIcon;
         public int pointCost = 1;
+
+        // Nested effect lists
+        public List<HediffEffectProperties> hediffEffects;
+        public List<AbilityEffectProperties> abilityEffects;
+        public List<OrganEffectProperties> organEffects;
+
+        public List<UpgradeEffect> CreateEffects()
+        {
+            var effects = new List<UpgradeEffect>();
+
+            if (hediffEffects != null)
+                foreach (var props in hediffEffects)
+                    effects.Add(new HediffEffect { hediffDef = props.hediffDef });
+
+            if (abilityEffects != null)
+                foreach (var props in abilityEffects)
+                    effects.Add(new AbilityEffect { abilities = props.abilities });
+
+            if (organEffects != null)
+                foreach (var props in organEffects)
+                    effects.Add(new OrganEffect
+                    {
+                        targetOrgan = props.targetOrgan,
+                        addedOrganHediff = props.addedOrganHediff,
+                        isAddition = props.isAddition
+                    });
+
+            return effects;
+        }
+    }
+
+    public class OrganEffectProperties
+    {
+        public BodyPartDef targetOrgan;
+        public HediffDef addedOrganHediff;
+        public bool isAddition;
+    }
+
+    // Previous property classes remain the same
+    public class HediffEffectProperties
+    {
+        public HediffDef hediffDef;
+    }
+
+    public class AbilityEffectProperties
+    {
+        public List<AbilityDef> abilities;
     }
 }
