@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <InspectorTabDef>
+    <defName>ParasiteTab</defName>
+    <label>parasites</label>
+    <tabClass>Protean.ProteanTabUI</tabClass>
+  </InspectorTabDef>
+</Defs>

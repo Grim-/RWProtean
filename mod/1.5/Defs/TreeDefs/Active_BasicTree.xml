@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <!-- Tree Definition -->
+  <Protean.UpgradeTreeDef>
+    <defName>Active_BasicParasiteTree</defName>
+    <dimensions>(10,10)</dimensions>
+    <nodes>
+      <li>ParasiteBasicMetabolism</li>
+    </nodes>
+    <availablePaths>
+      <li>ParasitePath</li>
+      <li>SymbiosisPath</li>
+      <li>SymbiosisPathBranch1_A</li>
+      <li>SymbiosisPathBranch1_B</li>
+    </availablePaths>
+    <displayStrategy>VerticalStrategy</displayStrategy>
+  </Protean.UpgradeTreeDef>
+</Defs>

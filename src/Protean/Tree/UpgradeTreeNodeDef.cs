@@ -11,6 +11,7 @@ namespace Protean
         public List<UpgradeTreeNodeDef> connections;
         public NodeType type = NodeType.Normal;
         public UpgradePathDef path;
+        public List<BranchPathData> branchPaths;
 
         public IEnumerable<UpgradeTreeNodeDef> GetPredecessors(UpgradeTreeDef treeDef)
         {
@@ -20,12 +21,19 @@ namespace Protean
 
         public int ConnectionCount => connections != null ? connections.Count : 0;
         public bool BelongsToUpgradePath => path != null;
-
+        public bool IsBranchNode => type == NodeType.Branch;
         public enum NodeType
         {
             Normal,
             Keystone,
-            Start
+            Start,
+            Branch
         }
+    }
+
+    public class BranchPathData
+    {
+        public UpgradePathDef path;
+        public List<UpgradeTreeNodeDef> nodes;
     }
 }

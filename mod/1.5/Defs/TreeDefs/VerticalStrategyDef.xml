@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <Protean.TreeDisplayStrategyDef>
+    <defName>VerticalStrategy</defName>
+    <strategyClass>Protean.VerticalTreeStrategy</strategyClass>
+  </Protean.TreeDisplayStrategyDef>
+
+  <Protean.TreeDisplayStrategyDef>
+    <defName>RingStrategy</defName>
+    <strategyClass>Protean.ConcentricRingStrategy</strategyClass>
+  </Protean.TreeDisplayStrategyDef>
+
+  <Protean.TreeDisplayStrategyDef>
+    <defName>ForceStrategy</defName>
+    <strategyClass>Protean.ForceDirectedStrategy</strategyClass>
+  </Protean.TreeDisplayStrategyDef>
+</Defs>

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <Protean.UpgradeDef>
+      <defName>BasicMetabolismUpgrade</defName>
+      <label>Basic Metabolism</label>
+      <description>Unlocks basic metabolic enhancements, improving eating and rest efficiency.</description>
+      <parasiteLevelRequired>0</parasiteLevelRequired>
+      <hediffEffects>
+          <li>
+              <hediffDef>ParasiteMetabolicBoost</hediffDef>
+          </li>
+      </hediffEffects>
+      <uiIcon>fg4_buttonBrownRound1_Over</uiIcon>
+  </Protean.UpgradeDef>
+
+  <HediffDef>
+    <defName>ParasiteMetabolicBoost</defName>
+    <label>enhanced metabolism</label>
+    <description>Metabolic functions have been enhanced by the parasite.</description>
+    <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+    <isBad>false</isBad>
+    <stages>
+      <li>
+        <statOffsets>
+          <EatingSpeed>0.15</EatingSpeed>
+          <RestRateMultiplier>0.1</RestRateMultiplier>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+
+
+  <Protean.UpgradeDef>
+      <defName>ExtraOrganUpgrade</defName>
+      <label>Extra Organ</label>
+      <description>Adds an additional organ.</description>
+      <parasiteLevelRequired>0</parasiteLevelRequired>
+      <organEffects>
+          <li>
+              <targetOrgan>Lung</targetOrgan>
+              <addedOrganHediff>ExtraLung</addedOrganHediff>
+              <isAddition>true</isAddition>
+          </li>
+      </organEffects>
+  </Protean.UpgradeDef>
+
+  <HediffDef ParentName="AddedBodyPartBase">
+      <defName>ExtraLung</defName>
+      <label>additional lung</label>
+      <description>An additional parasitic lung has grown.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <addedPartProps>
+          <solid>true</solid>
+          <partEfficiency>1.0</partEfficiency>
+          <betterThanNatural>true</betterThanNatural>
+      </addedPartProps>
+      <stages>
+          <li>
+              <capMods>
+                  <li>
+                      <capacity>Breathing</capacity>
+                      <offset>0.25</offset>
+                  </li>
+              </capMods>
+          </li>
+      </stages>
+  </HediffDef>
+
+
+
+  <!-- Enhanced Sensory Processing -->
+  <Protean.UpgradeDef>
+      <defName>SensoryEnhancementUpgrade</defName>
+      <label>Sensory Enhancement</label>
+      <description>Enhances neural processing of sensory input, improving reaction time and awareness.</description>
+      <parasiteLevelRequired>1</parasiteLevelRequired>
+      <hediffEffects>
+          <li>
+              <hediffDef>ParasiteSensoryBoost</hediffDef>
+          </li>
+      </hediffEffects>
+  </Protean.UpgradeDef>
+
+  <HediffDef>
+      <defName>ParasiteSensoryBoost</defName>
+      <label>enhanced senses</label>
+      <description>Neural pathways have been optimized for faster sensory processing.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <isBad>false</isBad>
+      <stages>
+          <li>
+              <statOffsets>
+                  <AimingDelayFactor>-0.15</AimingDelayFactor>
+                  <ShootingAccuracyPawn>2.0</ShootingAccuracyPawn>
+              </statOffsets>
+          </li>
+      </stages>
+  </HediffDef>
+
+  <!-- Reinforced Skeletal Structure -->
+  <Protean.UpgradeDef>
+      <defName>BoneReinforcementUpgrade</defName>
+      <label>Bone Reinforcement</label>
+      <description>Strengthens the skeletal structure with parasitic reinforcement.</description>
+      <parasiteLevelRequired>2</parasiteLevelRequired>
+      <organEffects>
+          <li>
+              <targetOrgan>Bone</targetOrgan>
+              <addedOrganHediff>ReinforcedBones</addedOrganHediff>
+              <isAddition>false</isAddition>
+          </li>
+      </organEffects>
+  </Protean.UpgradeDef>
+
+  <HediffDef>
+      <defName>ReinforcedBones</defName>
+      <label>reinforced bones</label>
+      <description>Bones have been strengthened with parasitic structures.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <stages>
+          <li>
+              <statOffsets>
+                  <CarryingCapacity>20.0</CarryingCapacity>
+              </statOffsets>
+              <capMods>
+                  <li>
+                      <capacity>Moving</capacity>
+                      <offset>0.1</offset>
+                  </li>
+              </capMods>
+          </li>
+      </stages>
+  </HediffDef>
+
+  <!-- Combat Reflexes -->
+  <Protean.UpgradeDef>
+      <defName>CombatReflexesUpgrade</defName>
+      <label>Combat Reflexes</label>
+      <description>Grants enhanced combat abilities through parasitic nervous system modifications.</description>
+      <parasiteLevelRequired>3</parasiteLevelRequired>
+      <abilityEffects>
+          <li>
+            <abilities>
+              <li>
+                <abilityDef>ParasiticDodge</abilityDef>
+               </li>
+            </abilities>
+          </li>
+      </abilityEffects>
+  </Protean.UpgradeDef>
+
+  <AbilityDef>
+      <defName>ParasiticDodge</defName>
+      <label>parasitic dodge</label>
+      <description>Temporarily boosts dodge chance through enhanced reflexes.</description>
+      <iconPath>Abilities/ParasiticDodge</iconPath>
+      <statBases>
+          <Cooldown>300</Cooldown>
+      </statBases>
+      <targetRequired>False</targetRequired>
+      <verbProperties>
+          <verbClass>Verb_CastAbility</verbClass>
+          <drawTime>150</drawTime>
+      </verbProperties>
+      <comps>
+          <li Class="CompProperties_AbilityGiveHediff">
+              <compClass>CompAbilityEffect_GiveHediff</compClass>
+              <hediffDef>ParasiticDodgeBoost</hediffDef>
+              <duration>15</duration>
+          </li>
+      </comps>
+  </AbilityDef>
+
+  <HediffDef>
+      <defName>ParasiticDodgeBoost</defName>
+      <label>enhanced reflexes</label>
+      <description>Reflexes temporarily enhanced by parasitic nervous system boost.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <isBad>false</isBad>
+      <stages>
+          <li>
+              <statOffsets>
+                  <MeleeDodgeChance>15.0</MeleeDodgeChance>
+              </statOffsets>
+          </li>
+      </stages>
+  </HediffDef>
+
+  <!-- Auxiliary Heart -->
+  <Protean.UpgradeDef>
+      <defName>AuxiliaryHeartUpgrade</defName>
+      <label>Auxiliary Heart</label>
+      <description>Grows an additional heart to improve blood circulation and stamina.</description>
+      <parasiteLevelRequired>4</parasiteLevelRequired>
+      <organEffects>
+          <li>
+              <targetOrgan>Heart</targetOrgan>
+              <addedOrganHediff>AuxiliaryHeart</addedOrganHediff>
+              <isAddition>true</isAddition>
+          </li>
+      </organEffects>
+  </Protean.UpgradeDef>
+
+  <HediffDef ParentName="AddedBodyPartBase">
+      <defName>AuxiliaryHeart</defName>
+      <label>auxiliary heart</label>
+      <description>An additional parasitic heart has grown to support the circulatory system.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <addedPartProps>
+          <solid>true</solid>
+          <partEfficiency>1.0</partEfficiency>
+          <betterThanNatural>true</betterThanNatural>
+      </addedPartProps>
+      <stages>
+          <li>
+              <statOffsets>
+                  <MoveSpeed>0.15</MoveSpeed>
+                  <WorkSpeedGlobal>0.1</WorkSpeedGlobal>
+              </statOffsets>
+              <capMods>
+                  <li>
+                      <capacity>BloodPumping</capacity>
+                      <offset>0.5</offset>
+                  </li>
+              </capMods>
+          </li>
+      </stages>
+  </HediffDef>
+  <!-- Symbiotic Consciousness -->
+     <Protean.UpgradeDef>
+         <defName>SymbioticConsciousnessUpgrade</defName>
+         <label>Symbiotic Consciousness</label>
+         <description>Achieves a deeper neural connection between host and parasite, enabling shared processing power and enhanced mental capabilities.</description>
+         <parasiteLevelRequired>5</parasiteLevelRequired>
+         <hediffEffects>
+             <li>
+                 <hediffDef>SymbioticConsciousness</hediffDef>
+             </li>
+         </hediffEffects>
+         <abilityEffects>
+             <li>
+               <abilities>
+                 <li>
+                   <abilityDef>SymbioticFocus</abilityDef>
+                  </li>
+               </abilities>
+             </li>
+         </abilityEffects>
+     </Protean.UpgradeDef>
+
+     <HediffDef>
+         <defName>SymbioticConsciousness</defName>
+         <label>symbiotic consciousness</label>
+         <description>Mind and parasite work in perfect harmony, enhancing mental capabilities.</description>
+         <defaultLabelColor>(0.7, 0.5, 0.8)</defaultLabelColor>
+         <isBad>false</isBad>
+         <stages>
+             <li>
+                 <statOffsets>
+                     <ResearchSpeed>0.25</ResearchSpeed>
+                     <GlobalLearningFactor>0.15</GlobalLearningFactor>
+                     <MentalBreakThreshold>-0.10</MentalBreakThreshold>
+                 </statOffsets>
+             </li>
+         </stages>
+     </HediffDef>
+
+     <AbilityDef>
+         <defName>SymbioticFocus</defName>
+         <label>symbiotic focus</label>
+         <description>Channel the shared consciousness to achieve a state of perfect focus and clarity.</description>
+         <iconPath>Abilities/SymbioticFocus</iconPath>
+         <statBases>
+             <Cooldown>1200</Cooldown>
+         </statBases>
+         <targetRequired>False</targetRequired>
+         <verbProperties>
+             <verbClass>Verb_CastAbility</verbClass>
+             <drawTime>150</drawTime>
+         </verbProperties>
+         <comps>
+             <li Class="CompProperties_AbilityGiveHediff">
+                 <compClass>CompAbilityEffect_GiveHediff</compClass>
+                 <hediffDef>SymbioticFocusState</hediffDef>
+                 <duration>30</duration>
+             </li>
+         </comps>
+     </AbilityDef>
+
+     <HediffDef>
+         <defName>SymbioticFocusState</defName>
+         <label>symbiotic focus</label>
+         <description>In a state of perfect harmony with the parasite, achieving extraordinary mental clarity.</description>
+         <defaultLabelColor>(0.7, 0.5, 0.8)</defaultLabelColor>
+         <isBad>false</isBad>
+         <stages>
+             <li>
+                 <statOffsets>
+                     <WorkSpeedGlobal>0.50</WorkSpeedGlobal>
+                     <MentalStateLowerThreshold>-1.0</MentalStateLowerThreshold>
+                 </statOffsets>
+                 <capMods>
+                     <li>
+                         <capacity>Consciousness</capacity>
+                         <offset>0.25</offset>
+                     </li>
+                 </capMods>
+             </li>
+         </stages>
+     </HediffDef>
+</Defs>

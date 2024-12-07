@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Proteans</name>
+  <author>Emo</author>
+  <supportedVersions>
+    <li>1.5</li>
+  </supportedVersions>
+	<packageId>com.emo.proteans</packageId>
+        <description>Adds fusions and potarra earrings.</description>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+		<li>Ludeon.RimWorld.Biotech</li>
+	</loadAfter>
+	<modDependencies>
+	</modDependencies>
+</ModMetaData>

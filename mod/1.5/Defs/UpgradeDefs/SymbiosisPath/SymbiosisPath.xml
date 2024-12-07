@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <!-- Symbiosis Path
+  <Protean.UpgradePathDef>
+    <defName>SymbiosisPath</defName>
+    <pathDescription>22222222</pathDescription>
+    <exclusiveWith>
+      <li>ParasitePath</li>
+    </exclusiveWith>
+  </Protean.UpgradePathDef> -->
+
+  <!-- Symbiosis Path NODES
+  <Protean.UpgradeTreeNodeDef>
+     <defName>SymbiosisPathNode1</defName>
+     <position>(1,4)</position>
+     <type>Branch</type>
+     <upgrade>CombatReflexesUpgrade</upgrade>
+     <path>SymbiosisPath</path>
+     <connections>
+       <li>SymbiosisPathNode2</li>
+       <li>SymbiosisPathNode3</li>
+     </connections>
+     <branchPaths>
+       <li>
+         <path>SymbiosisPathBranch1_A</path>
+         <nodes>
+           <li>SymbiosisPathNode2</li>
+         </nodes>
+       </li>
+       <li>
+         <path>SymbiosisPathBranch1_B</path>
+         <nodes>
+           <li>SymbiosisPathNode3</li>
+         </nodes>
+       </li>
+     </branchPaths>
+   </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>SymbiosisPathNode2</defName>
+    <position>(1,4)</position>
+    <type>Normal</type>
+    <upgrade>AuxiliaryHeartUpgrade</upgrade>
+    <path>SymbiosisPathBranch1_A</path>
+    <uiIcon>button_agree</uiIcon>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>SymbiosisPathNode3</defName>
+    <position>(1,4)</position>
+    <type>Normal</type>
+    <upgrade>SymbioticConsciousnessUpgrade</upgrade>
+    <path>SymbiosisPathBranch1_B</path>
+    <uiIcon>lil_roundframe_ready</uiIcon>
+  </Protean.UpgradeTreeNodeDef>
+
+    <Protean.UpgradePathDef>
+    <defName>SymbiosisPathBranch1_A</defName>
+    <pathDescription>Auxiliary Heart specialization</pathDescription>
+    <exclusiveWith>
+      <li>SymbiosisPathBranch1_B</li>
+    </exclusiveWith>
+  </Protean.UpgradePathDef>
+
+  <Protean.UpgradePathDef>
+    <defName>SymbiosisPathBranch1_B</defName>
+    <pathDescription>Symbiotic Consciousness specialization</pathDescription>
+    <exclusiveWith>
+      <li>SymbiosisPathBranch1_A</li>
+    </exclusiveWith>
+  </Protean.UpgradePathDef>-->
+</Defs>

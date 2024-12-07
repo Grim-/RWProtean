@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <GeneDef>
+    <defName>Protean_BasicGene</defName>
+    <label>Protean_BasicGene</label>
+    <description>Protean_BasicGene</description>
+    <geneClass>Protean.Gene_Parasite</geneClass>
+  </GeneDef>
+
+</Defs>

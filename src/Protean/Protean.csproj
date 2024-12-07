@@ -83,10 +83,14 @@
   <ItemGroup>
     <Compile Include="ActiveTreeHandler.cs" />
     <Compile Include="BaseTreeHandler.cs" />
-    <Compile Include="ConcentricRingStrategy.cs" />
-    <Compile Include="ForceDirectedStrategy.cs" />
-    <Compile Include="ITreeDisplayStrategy.cs" />
+    <Compile Include="DisplayStrategies\ConcentricRingStrategy.cs" />
+    <Compile Include="ConnectionAnimation.cs" />
+    <Compile Include="DisplayStrategies\ForceDirectedStrategy.cs" />
+    <Compile Include="DisplayStrategies\ITreeDisplayStrategy.cs" />
+    <Compile Include="NodeFadeAnimation.cs" />
     <Compile Include="PassiveTreeHandler.cs" />
+    <Compile Include="Tree\UpgradeTreeSkinDef.cs" />
+    <Compile Include="UIAnimationState.cs" />
     <Compile Include="UnlockResult.cs" />
     <Compile Include="Upgrades\AbilityEffect.cs" />
     <Compile Include="Upgrades\AbilityEffectDef.cs" />
@@ -106,7 +110,7 @@
     <Compile Include="ProteanTabUI.cs" />
     <Compile Include="Tree\UpgradePathDef.cs" />
     <Compile Include="UpgradeUnlockError.cs" />
-    <Compile Include="VerticalTreeStrategy.cs" />
+    <Compile Include="DisplayStrategies\VerticalTreeStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

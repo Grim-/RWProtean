@@ -10,6 +10,7 @@ namespace Protean
         public List<UpgradeTreeNodeDef> nodes;
         public IntVec2 dimensions;
         public Type handlerClass;
+        public UpgradeTreeSkinDef skin;
         public List<UpgradePathDef> availablePaths;
         public TreeDisplayStrategyDef displayStrategy;
 
@@ -31,8 +32,18 @@ namespace Protean
                     {
                         foreach (var connected in node.connections)
                         {
-                            if (connected != null)
-                                toProcess.Enqueue(connected);
+                            toProcess.Enqueue(connected);
+                        }
+                    }
+
+                    if (node.IsBranchNode && !node.branchPaths.NullOrEmpty())
+                    {
+                        foreach (var branch in node.branchPaths)
+                        {
+                            foreach (var branchNode in branch.nodes)
+                            {
+                                toProcess.Enqueue(branchNode);
+                            }
                         }
                     }
                 }

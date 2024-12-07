@@ -14,10 +14,10 @@ namespace Protean
         private const float ANIMATION_SPEED = 0.05f;
         private const float MOVEMENT_THRESHOLD = 0.01f;
 
-        // Mouse avoidance parameters
-        private const float MOUSE_AVOID_RADIUS = 150f;  // How close the mouse needs to be to cause avoidance
-        private const float MOUSE_AVOID_FORCE = 100f;   // How strongly nodes flee from the mouse
-        private const float MOUSE_PANIC_SPEED = 2f;     // Multiplier for animation speed when fleeing
+        // sterring behaviour values
+        private const float MOUSE_AVOID_RADIUS = 150f;  
+        private const float MOUSE_AVOID_FORCE = 100f;   
+        private const float MOUSE_PANIC_SPEED = 2f;    
 
         private readonly float padding = 50f;
 
@@ -221,6 +221,11 @@ namespace Protean
             }
 
             return forces;
+        }
+
+        public void DrawControls(Rect toolbarRect)
+        {
+            
         }
     }
 }

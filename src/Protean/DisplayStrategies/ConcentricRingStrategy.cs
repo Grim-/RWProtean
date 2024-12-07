@@ -210,5 +210,10 @@ namespace Protean
                 ProcessNode(connection, processed, ordered);
             }
         }
+
+        public void DrawControls(Rect toolbarRect)
+        {
+           
+        }
     }
 }

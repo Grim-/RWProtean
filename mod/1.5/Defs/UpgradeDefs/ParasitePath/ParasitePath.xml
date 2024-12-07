@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+<!--   <Protean.UpgradePathDef>
+    <defName>ParasitePath</defName>
+    <pathDescription>11111111</pathDescription>
+    <exclusiveWith>
+      <li>SymbiosisPath</li>
+    </exclusiveWith>
+  </Protean.UpgradePathDef>
+
+  Parasite Path
+  <Protean.UpgradeTreeNodeDef>
+    <defName>ParasitePathNode1</defName>
+    <type>Normal</type>
+    <upgrade>ExtraOrganUpgrade</upgrade>
+    <path>ParasitePath</path>
+    <connections>
+      <li>ParasitePathNode2</li>
+    </connections>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>ParasitePathNode2</defName>
+    <type>Normal</type>
+    <upgrade>BoneReinforcementUpgrade</upgrade>
+    <path>ParasitePath</path>
+    <connections>
+      <li>ParasitePathNode3</li>
+    </connections>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>ParasitePathNode3</defName>
+    <type>Normal</type>
+    <upgrade>SensoryEnhancementUpgrade</upgrade>
+    <path>ParasitePath</path>
+  </Protean.UpgradeTreeNodeDef> -->
+
+</Defs>
