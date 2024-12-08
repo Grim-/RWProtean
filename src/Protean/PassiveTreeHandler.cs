@@ -115,11 +115,6 @@ namespace Protean
             } while (unlocked && availablePoints > 0);
         }
 
-        //public override bool ValidateUpgradePath(UpgradePathDef path)
-        //{
-        //    if (path == null) return true; // Null path is valid (for start nodes)
-        //    return IsPathSelected(path);
-        //}
 
         public override void ExposeData()
         {
