@@ -223,7 +223,7 @@ namespace Protean
             return forces;
         }
 
-        public void DrawControls(Rect toolbarRect)
+        public void DrawToolBar(Rect toolbarRect)
         {
             
         }

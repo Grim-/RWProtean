@@ -211,7 +211,7 @@ namespace Protean
             }
         }
 
-        public void DrawControls(Rect toolbarRect)
+        public void DrawToolBar(Rect toolbarRect)
         {
            
         }

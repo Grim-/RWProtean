@@ -87,6 +87,7 @@
     <Compile Include="ConnectionAnimation.cs" />
     <Compile Include="DisplayStrategies\ForceDirectedStrategy.cs" />
     <Compile Include="DisplayStrategies\ITreeDisplayStrategy.cs" />
+    <Compile Include="DisplayStrategies\TreeDisplayStrategyDef.cs" />
     <Compile Include="NodeFadeAnimation.cs" />
     <Compile Include="PassiveTreeHandler.cs" />
     <Compile Include="Tree\UpgradeTreeSkinDef.cs" />

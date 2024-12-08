@@ -50,5 +50,15 @@ namespace Protean
             }
             return allNodes.ToList();
         }
+
+        public UpgradeTreeSkinDef GetSkin()
+        {
+            if (this.skin == null)
+            {
+                return DefDatabase<UpgradeTreeSkinDef>.GetNamed("DefaultTreeSkin");
+            }
+
+            return skin;
+        }
     }
 }

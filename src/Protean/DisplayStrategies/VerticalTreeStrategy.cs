@@ -356,7 +356,7 @@ namespace Protean
             return rootNodes;
         }
 
-        public void DrawControls(Rect toolbarRect)
+        public void DrawToolBar(Rect toolbarRect)
         {
             float currentX = toolbarRect.x + 10f;
             float buttonWidth = 120f;

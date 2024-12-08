@@ -98,7 +98,7 @@ namespace Protean
                 unlocked = false;
                 var availableNodes = treeDef.GetAllNodes()
                     .Where(n => !IsNodeUnlocked(n) &&
-                               ValidateUpgradePath(n.path) &&
+                               ValidateUpgradePath(n) &&
                                n.type != UpgradeTreeNodeDef.NodeType.Start);
 
                 foreach (var node in availableNodes)
@@ -115,11 +115,11 @@ namespace Protean
             } while (unlocked && availablePoints > 0);
         }
 
-        public override bool ValidateUpgradePath(UpgradePathDef path)
-        {
-            if (path == null) return true; // Null path is valid (for start nodes)
-            return IsPathSelected(path);
-        }
+        //public override bool ValidateUpgradePath(UpgradePathDef path)
+        //{
+        //    if (path == null) return true; // Null path is valid (for start nodes)
+        //    return IsPathSelected(path);
+        //}
 
         public override void ExposeData()
         {

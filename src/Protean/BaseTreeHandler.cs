@@ -40,11 +40,33 @@ namespace Protean
         public virtual bool CanSelectPath(UpgradePathDef path)
         {
             if (path == null) return false;
+            if (selectedPaths.Contains(path)) return false;
 
-            // Check if the path is already selected
-            if (selectedPaths.Contains(path)) 
-                return false;
+            // Get all nodes that belong to this path
+            var nodesInPath = treeDef.GetAllNodes().Where(n => n.path == path).ToList();
+            if (!nodesInPath.Any()) return false;
 
+            // For each node in this path, check all its predecessors' paths
+            foreach (var node in nodesInPath)
+            {
+                var predecessorPaths = node.GetPredecessors(treeDef)
+                    .Where(p => p.path != null)
+                    .Select(p => p.path)
+                    .Distinct();
+
+                // If any predecessor path is exclusive with our current selections
+                // or is itself not selectable, then this path isn't selectable
+                foreach (var predPath in predecessorPaths)
+                {
+                    if (predPath.IsPathExclusiveWith(selectedPaths) ||
+                        selectedPaths.Any(sp => sp.IsPathExclusiveWith(predPath)))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // Finally check this path's own exclusivity
             return !path.IsPathExclusiveWith(selectedPaths);
         }
 
@@ -56,9 +78,7 @@ namespace Protean
         public virtual UnlockResult SelectPath(UpgradePathDef path)
         {
             if (!CanSelectPath(path))
-            {
-                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, $"Cannot select this path defName={path.defName}");
-            }
+                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, "Path conflicts with current selections");
 
             selectedPaths.Add(path);
             OnPathSelected(path);
@@ -68,33 +88,23 @@ namespace Protean
         protected virtual UnlockResult ValidateUnlock(UpgradeTreeNodeDef node)
         {
             if (node == null)
-            {
-                return UnlockResult.Failed(UpgradeUnlockError.InvalidNode, "Invalid upgrade node");
-            }
+                return UnlockResult.Failed(UpgradeUnlockError.InvalidNode, "Invalid node");
 
             if (IsNodeUnlocked(node))
-            {
-                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "This upgrade is already unlocked");
-            }
+                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Already unlocked");
 
-            if (node.type == UpgradeTreeNodeDef.NodeType.Start)
-            {
-                return UnlockResult.Succeeded();
-            }
-
+            // Prerequisites check
             if (node.type != UpgradeTreeNodeDef.NodeType.Start)
             {
                 bool hasUnlockedPredecessor = node.GetPredecessors(treeDef).Any(IsNodeUnlocked);
                 if (!hasUnlockedPredecessor)
-                {
-                    return UnlockResult.Failed(UpgradeUnlockError.NoPrecedingNode, "Requires a previous upgrade to be unlocked first");
-                }
+                    return UnlockResult.Failed(UpgradeUnlockError.NoPrecedingNode, "Requires a previous upgrade");
             }
 
-            if (!ValidateUpgradePath(node.path))
+            // For non-branch nodes that belong to a path, that path must be selected
+            if (node.type != UpgradeTreeNodeDef.NodeType.Branch && node.path != null && !IsPathSelected(node.path))
             {
-                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath,
-                    "Cannot unlock - This node belongs to a path you haven't selected");
+                return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, "Must select path at branch point first");
             }
 
             return UnlockResult.Succeeded();
@@ -158,7 +168,18 @@ namespace Protean
 
         protected abstract UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node);
         public abstract void OnPathSelected(UpgradePathDef path);
-        public abstract bool ValidateUpgradePath(UpgradePathDef path);
+        protected virtual bool ValidateUpgradePath(UpgradeTreeNodeDef node)
+        {
+            // Branch nodes can be used for path selection if their path is available
+            if (node.type == UpgradeTreeNodeDef.NodeType.Branch)
+                return node.path != null && CanSelectPath(node.path);
+
+            // Non-branch nodes require their path to be selected already
+            if (node.path != null)
+                return IsPathSelected(node.path);
+
+            return true;
+        }
 
         public virtual void ExposeData()
         {

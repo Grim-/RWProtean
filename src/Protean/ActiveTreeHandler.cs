@@ -51,12 +51,12 @@ namespace Protean
             // Active tree doesn't need special handling for path selection
         }
 
-        public override bool ValidateUpgradePath(UpgradePathDef path)
-        {
-            bool isSelected = IsPathSelected(path);
-            //Log.Message($"ActiveTreeHandler.ValidatePath: Path {path?.defName} selected = {isSelected}");
-            return isSelected;
-        }
+        //public override bool ValidateUpgradePath(UpgradePathDef path)
+        //{
+        //    bool isSelected = IsPathSelected(path);
+        //    //Log.Message($"ActiveTreeHandler.ValidatePath: Path {path?.defName} selected = {isSelected}");
+        //    return isSelected;
+        //}
 
         public override void ExposeData()
         {

@@ -14,9 +14,7 @@ namespace Protean
         public bool IsPathExclusiveWith(UpgradePathDef otherPath)
         {
             if (exclusiveWith == null || otherPath == null)
-            {
                 return false;
-            }
 
             return exclusiveWith.Contains(otherPath);
         }
@@ -24,11 +22,9 @@ namespace Protean
         public bool IsPathExclusiveWith(IEnumerable<UpgradePathDef> otherPaths)
         {
             if (exclusiveWith == null || otherPaths == null || !otherPaths.Any())
-            {
                 return false;
-            }
 
-            return otherPaths.Any(path => IsPathExclusiveWith(path));
+            return otherPaths.Any(IsPathExclusiveWith);
         }
     }
 }
