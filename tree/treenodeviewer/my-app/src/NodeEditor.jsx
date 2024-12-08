@@ -55,14 +55,7 @@ const serializeProperty = (key, value, indent) => {
 
   return '';
 };
-
 const NodeEditor = () => {
-  // View transformation state
-  const [scale, setScale] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-
   // Reference data state
   const [referenceDefs, setReferenceDefs] = useState(() => {
     const savedDefs = localStorage.getItem('nodeEditorReferenceDefs');
@@ -97,63 +90,6 @@ const NodeEditor = () => {
   useEffect(() => {
     localStorage.setItem('nodeEditorReferenceDefs', JSON.stringify(referenceDefs));
   }, [referenceDefs]);
-
-  // Pan and zoom handlers
-  const handleCanvasMouseDown = (e) => {
-    if (e.button === 1 || (e.button === 0 && e.altKey)) { // Middle mouse or Alt+Left click
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-      e.preventDefault();
-    }
-  };
-
-  const handleCanvasMouseMove = (e) => {
-    if (isPanning) {
-      setPan({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y
-      });
-      e.preventDefault();
-    }
-
-    if (draggingNode) {
-      setNodes(nodes.map(node => {
-        if (node.id === draggingNode) {
-          return {
-            ...node,
-            x: (e.clientX - draggingOffset.x - pan.x) / scale,
-            y: (e.clientY - draggingOffset.y - pan.y) / scale
-          };
-        }
-        return node;
-      }));
-    }
-  };
-
-  const handleCanvasMouseUp = () => {
-    setIsPanning(false);
-    setDraggingNode(null);
-  };
-
-  const handleWheel = (e) => {
-    e.preventDefault();
-    const delta = -e.deltaY;
-    const scaleChange = delta > 0 ? 1.1 : 0.9;
-    const newScale = Math.min(Math.max(0.1, scale * scaleChange), 5);
-
-    // Calculate cursor position relative to canvas
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Adjust pan to zoom toward cursor position
-    setPan({
-      x: pan.x - (x - pan.x) * (scaleChange - 1),
-      y: pan.y - (y - pan.y) * (scaleChange - 1)
-    });
-
-    setScale(newScale);
-  };
 
   // Session management functions
   const saveSessionToFile = () => {
@@ -356,9 +292,28 @@ const NodeEditor = () => {
     const node = nodes.find(n => n.id === nodeId);
     setDraggingNode(nodeId);
     setDraggingOffset({
-      x: e.clientX - (node.x * scale + pan.x),
-      y: e.clientY - (node.y * scale + pan.y)
+      x: e.clientX - node.x,
+      y: e.clientY - node.y
     });
+  };
+
+  const handleMouseMove = (e) => {
+    if (draggingNode) {
+      setNodes(nodes.map(node => {
+        if (node.id === draggingNode) {
+          return {
+            ...node,
+            x: e.clientX - draggingOffset.x,
+            y: e.clientY - draggingOffset.y
+          };
+        }
+        return node;
+      }));
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDraggingNode(null);
   };
 
   const handleNodeSelect = (nodeId, e) => {
@@ -425,7 +380,7 @@ const NodeEditor = () => {
   return (
     <div className="w-full h-screen bg-gray-100 relative p-4">
       {/* Top toolbar */}
-      <div className="absolute top-4 right-4 space-x-2 z-10">
+      <div className="absolute top-4 right-4 space-x-2">
         <Button
           onClick={() => {
             const newId = `node_${Date.now()}`;
@@ -465,7 +420,7 @@ const NodeEditor = () => {
       </div>
 
       {/* Properties Panel */}
-      <div className="w-64 absolute left-4 top-4 bg-white rounded-lg shadow-lg p-4 z-10">
+      <div className="w-64 absolute left-4 top-4 bg-white rounded-lg shadow-lg p-4">
         <h3 className="font-bold mb-4">Properties</h3>
         {selectedNode && (
           <div className="space-y-4">
@@ -537,130 +492,112 @@ const NodeEditor = () => {
 
       {/* Main canvas area */}
       <div
-        className="w-full h-full overflow-hidden cursor-grab"
-        onMouseDown={handleCanvasMouseDown}
-        onMouseMove={handleCanvasMouseMove}
-        onMouseUp={handleCanvasMouseUp}
-        onWheel={handleWheel}
-        style={{
-          touchAction: 'none'
-        }}
+        className="w-full h-full"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
       >
-        {/* Transformation container */}
-        <div
-          style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-            transformOrigin: '0 0',
-            width: '100%',
-            height: '100%',
-            position: 'relative'
-          }}
-        >
-          {/* Connection lines */}
-          <svg className="w-full h-full absolute top-0 left-0 pointer-events-none">
-            {nodes.map(node =>
-              node.connections.map(targetId => {
-                const target = nodes.find(n => n.id === targetId);
-                if (!target) return null;
-                return (
-                  <line
-                    key={`${node.id}-${targetId}`}
-                    x1={node.x + 75}
-                    y1={node.y + 25}
-                    x2={target.x + 75}
-                    y2={target.y + 25}
-                    stroke="black"
-                    strokeWidth={2 / scale}
-                  />
-                );
-              })
-            )}
-            {connecting && (
-              <line
-                x1={nodes.find(n => n.id === connecting)?.x + 75 || 0}
-                y1={nodes.find(n => n.id === connecting)?.y + 25 || 0}
-                x2={draggingNode ? nodes.find(n => n.id === draggingNode)?.x + 75 : 0}
-                y2={draggingNode ? nodes.find(n => n.id === draggingNode)?.y + 25 : 0}
-                stroke="blue"
-                strokeWidth={2 / scale}
-                strokeDasharray="5,5"
-              />
-            )}
-          </svg>
+        {/* Connection lines */}
+        <svg className="w-full h-full absolute top-0 left-0 pointer-events-none">
+          {nodes.map(node =>
+            node.connections.map(targetId => {
+              const target = nodes.find(n => n.id === targetId);
+              if (!target) return null;
+              return (
+                <line
+                  key={`${node.id}-${targetId}`}
+                  x1={node.x + 75}
+                  y1={node.y + 25}
+                  x2={target.x + 75}
+                  y2={target.y + 25}
+                  stroke="black"
+                  strokeWidth="2"
+                />
+              );
+            })
+          )}
+          {connecting && (
+            <line
+              x1={nodes.find(n => n.id === connecting)?.x + 75 || 0}
+              y1={nodes.find(n => n.id === connecting)?.y + 25 || 0}
+              x2={draggingNode ? nodes.find(n => n.id === draggingNode)?.x + 75 : 0}
+              y2={draggingNode ? nodes.find(n => n.id === draggingNode)?.y + 25 : 0}
+              stroke="blue"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+          )}
+        </svg>
 
-          {/* Nodes */}
-          {nodes.map(node => (
+        {/* Nodes */}
+        {nodes.map(node => (
+          <div
+            key={node.id}
+            className={`absolute p-4 rounded-lg shadow-lg w-40 cursor-move
+              ${node.type === 'Start' ? 'bg-green-100' : 'bg-white'}
+              ${node.type === 'Branch' ? 'bg-yellow-100' : ''}
+              ${selectedNode === node.id ? 'ring-2 ring-blue-500' : ''}
+              ${connecting === node.id ? 'ring-2 ring-blue-300' : ''}`}
+            style={{
+              left: node.x,
+              top: node.y
+            }}
+            onMouseDown={(e) => handleMouseDown(e, node.id)}
+            onClick={(e) => handleNodeSelect(node.id, e)}
+          >
             <div
-              key={node.id}
-              className={`absolute p-4 rounded-lg shadow-lg w-40 cursor-move
-                ${node.type === 'Start' ? 'bg-green-100' : 'bg-white'}
-                ${node.type === 'Branch' ? 'bg-yellow-100' : ''}
-                ${selectedNode === node.id ? 'ring-2 ring-blue-500' : ''}
-                ${connecting === node.id ? 'ring-2 ring-blue-300' : ''}`}
-              style={{
-                left: node.x,
-                top: node.y,
-                transform: `scale(${1 / scale})`,
-                transformOrigin: 'top left'
+              className="text-sm font-medium mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(node.label, 'label');
               }}
-              onMouseDown={(e) => handleMouseDown(e, node.id)}
-              onClick={(e) => handleNodeSelect(node.id, e)}
+              title="Click to copy label"
             >
-              <div
-                className="text-sm font-medium mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyToClipboard(node.label, 'label');
-                }}
-                title="Click to copy label"
-              >
-                {node.label}
-              </div>
-              <div
-                className="text-xs text-gray-500 mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyToClipboard(node.path, 'path');
-                }}
-                title="Click to copy path"
-              >
-                {node.path && `Path: ${node.path}`}
-              </div>
-              <div
-                className="text-xs text-gray-500 mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyToClipboard(node.upgrade, 'upgrade');
-                }}
-                title="Click to copy upgrade"
-              >
-                {node.upgrade && `Upgrade: ${node.upgrade}`}
-              </div>
-              <div className="flex justify-between items-center">
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startConnection(node.id);
-                  }}
-                  className="bg-blue-500 text-white"
-                >
-                  →
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNodes(nodes.filter(n => n.id !== node.id));
-                  }}
-                  className="bg-red-500 text-white"
-                >
-                  ×
-                </Button>
-              </div>
+              {node.label}
             </div>
-          ))}
-        </div>
+            <div
+              className="text-xs text-gray-500 mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(node.path, 'path');
+              }}
+              title="Click to copy path"
+            >
+              {node.path && `Path: ${node.path}`}
+            </div>
+            <div
+              className="text-xs text-gray-500 mb-2 cursor-pointer hover:bg-gray-100 px-1 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(node.upgrade, 'upgrade');
+              }}
+              title="Click to copy upgrade"
+            >
+              {node.upgrade && `Upgrade: ${node.upgrade}`}
+            </div>
+            <div className="flex justify-between items-center">
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startConnection(node.id);
+                }}
+                className="bg-blue-500 text-white"
+              >
+                →
+              </Button>
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNodes(nodes.filter(n => n.id !== node.id));
+                }}
+                className="bg-red-500 text-white"
+              >
+                ×
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Export Modal */}
@@ -695,6 +632,8 @@ const NodeEditor = () => {
       </Modal>
     </div>
   );
+
+  // Close the NodeEditor component
 };
 
 export default NodeEditor;
