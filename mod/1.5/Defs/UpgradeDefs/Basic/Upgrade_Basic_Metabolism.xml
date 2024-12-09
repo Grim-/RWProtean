@@ -308,4 +308,87 @@
              </li>
          </stages>
      </HediffDef>
+
+     <Protean.UpgradeDef>
+    <defName>AuxiliaryHeartUpgrade2</defName>
+    <label>Advanced Auxiliary Heart</label>
+    <description>Further enhances the auxiliary heart's capabilities with advanced parasitic tissue.</description>
+    <parasiteLevelRequired>5</parasiteLevelRequired>
+    <hediffEffects>
+        <li>
+            <hediffDef>EnhancedAuxiliaryHeart</hediffDef>
+        </li>
+    </hediffEffects>
+</Protean.UpgradeDef>
+
+<HediffDef ParentName="AddedBodyPartBase">
+    <defName>EnhancedAuxiliaryHeart</defName>
+    <label>enhanced auxiliary heart</label>
+    <description>The auxiliary heart has been enhanced with advanced parasitic tissue.</description>
+    <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+    <stages>
+        <li>
+            <statOffsets>
+                <MoveSpeed>0.25</MoveSpeed>
+                <WorkSpeedGlobal>0.15</WorkSpeedGlobal>
+            </statOffsets>
+            <capMods>
+                <li>
+                    <capacity>BloodPumping</capacity>
+                    <offset>0.75</offset>
+                </li>
+            </capMods>
+        </li>
+    </stages>
+</HediffDef>
+
+<Protean.UpgradeDef>
+    <defName>AuxiliaryHeartUpgrade3</defName>
+    <label>Superior Auxiliary Heart</label>
+    <description>Maximizes the auxiliary heart's potential through complete parasitic integration.</description>
+    <parasiteLevelRequired>6</parasiteLevelRequired>
+    <hediffEffects>
+        <li>
+            <hediffDef>SuperiorAuxiliaryHeart</hediffDef>
+        </li>
+    </hediffEffects>
+</Protean.UpgradeDef>
+
+<HediffDef ParentName="AddedBodyPartBase">
+    <defName>SuperiorAuxiliaryHeart</defName>
+    <label>superior auxiliary heart</label>
+    <description>The auxiliary heart has achieved perfect symbiosis with parasitic tissue.</description>
+    <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+    <stages>
+        <li>
+            <statOffsets>
+                <MoveSpeed>0.35</MoveSpeed>
+                <WorkSpeedGlobal>0.20</WorkSpeedGlobal>
+            </statOffsets>
+            <capMods>
+                <li>
+                    <capacity>BloodPumping</capacity>
+                    <offset>1.0</offset>
+                </li>
+            </capMods>
+        </li>
+    </stages>
+</HediffDef>
+
+<!-- Upgrade Paths -->
+<Protean.UpgradePathDef>
+    <defName>ParasitePath1_A</defName>
+    <pathDescription>Cardiovascular Enhancement Path A</pathDescription>
+    <exclusiveWith>
+      <li>ParasitePath1_B</li>
+    </exclusiveWith>
+</Protean.UpgradePathDef>
+
+<Protean.UpgradePathDef>
+    <defName>ParasitePath1_B</defName>
+    <pathDescription>Cardiovascular Enhancement Path B</pathDescription>
+    <exclusiveWith>
+      <li>ParasitePath1_A</li>
+    </exclusiveWith>
+</Protean.UpgradePathDef>
 </Defs>

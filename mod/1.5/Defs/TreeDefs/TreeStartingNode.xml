@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <!-- Starting node -->
-  <Protean.UpgradeTreeNodeDef>
-    <defName>ParasiteBasicMetabolism</defName>
-    <position>(0,5)</position>
-    <type>Start</type>
-    <upgrade>BasicMetabolismUpgrade</upgrade>
-    <connections>
-      <li>ParasitePathNode1</li>
-      <li>SymbiosisPathNode1</li>
-    </connections>
-  </Protean.UpgradeTreeNodeDef>
+    <Protean.UpgradeTreeNodeDef>
+      <defName>ParasiteBasicMetabolism</defName>
+      <type>Start</type>
+      <upgrades>
+        <li>BasicMetabolismUpgrade</li>
+      </upgrades>
+      <connections>
+        <li>ParasitePathNode1</li>
+        <li>SymbiosisPathNode1</li>
+      </connections>
+    </Protean.UpgradeTreeNodeDef>
 
 </Defs>
