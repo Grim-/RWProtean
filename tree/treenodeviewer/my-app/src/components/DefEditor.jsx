@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DefTypes, DefStructures } from '../DefTypes';
 
-const DefEditor = () => {
+const DefEditor = ({ nodes, setNodes, paths, setPaths }) => {
   const [selectedType, setSelectedType] = useState(null);
   const [currentDef, setCurrentDef] = useState(null);
 

@@ -53,7 +53,7 @@ namespace Protean
         {
             Rect toolbarRect = new Rect(0f, 0f, inRect.width, skin.toolbarHeight);
             DrawToolbar(toolbarRect);
-            Widgets.DrawTextureFitted(inRect, skin.BackgroundTexture, 1f);
+            Widgets.DrawTextureFitted(new Rect(0,0, this.windowRect.size.x, this.windowRect.size.y), skin.BackgroundTexture, 1f);
             nodePositions = displayStrategy.PositionNodes(allNodes, inRect, skin.nodeSize, skin.nodeSpacing);
 
             DrawConnections();

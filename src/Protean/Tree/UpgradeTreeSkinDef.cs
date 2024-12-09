@@ -39,7 +39,7 @@ namespace Protean
         public Color labelColor = Color.white;
 
         // Toolbar configuration
-        public float toolbarHeight = 35f;
+        public float toolbarHeight = 80f;
 
         private Texture2D cachedBackgroundTexture;
         private Texture2D cachedNodeTexture;

@@ -55,7 +55,7 @@ const serializeProperty = (key, value, indent) => {
 
   return '';
 };
-const NodeEditor = () => {
+const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
   // Reference data state
   const [referenceDefs, setReferenceDefs] = useState(() => {
     const savedDefs = localStorage.getItem('nodeEditorReferenceDefs');
@@ -63,19 +63,6 @@ const NodeEditor = () => {
   });
 
   // Core state
-  const [nodes, setNodes] = useState([{
-    id: 'start',
-    label: 'Basic Parasite Metabolism',
-    type: 'Start',
-    x: 200,
-    y: 50,
-    connections: [],
-    path: '',
-    upgrade: 'BasicParasiteMetabolism',
-    branchPaths: []
-  }]);
-
-  const [paths, setPaths] = useState([]);
 
   // UI state
   const [draggingNode, setDraggingNode] = useState(null);
