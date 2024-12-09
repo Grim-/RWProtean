@@ -35,11 +35,7 @@ namespace Protean
             allNodes = treeDef.GetAllNodes();
             skin = tree.GetSkin();
 
-
-
-
-            displayStrategy = (ITreeDisplayStrategy)Activator.CreateInstance(
-                displayStrategyDef.strategyClass);
+            displayStrategy = (ITreeDisplayStrategy)Activator.CreateInstance(displayStrategyDef.strategyClass);
 
             doCloseButton = false;
             doCloseX = true;
@@ -47,18 +43,19 @@ namespace Protean
             absorbInputAroundWindow = false;
         }
 
-
-
         public override void DoWindowContents(Rect inRect)
         {
+            // Draw background to fill the entire content area first
+            Widgets.DrawTextureFitted(inRect, skin.BackgroundTexture, 1f);
+
+            // Then draw toolbar
             Rect toolbarRect = new Rect(0f, 0f, inRect.width, skin.toolbarHeight);
             DrawToolbar(toolbarRect);
-            Widgets.DrawTextureFitted(new Rect(0,0, this.windowRect.size.x, this.windowRect.size.y), skin.BackgroundTexture, 1f);
-            nodePositions = displayStrategy.PositionNodes(allNodes, inRect, skin.nodeSize, skin.nodeSpacing);
 
+            // Rest of the window contents
+            nodePositions = displayStrategy.PositionNodes(allNodes, inRect, skin.nodeSize, skin.nodeSpacing);
             DrawConnections();
             DrawNodes();
-
             activeAnimations.RemoveAll(a => a.Finished);
             foreach (var anim in activeAnimations)
             {
@@ -74,18 +71,57 @@ namespace Protean
             }
         }
 
-        public void DrawNode(UpgradeTreeNodeDef node, Rect nodeRect)
+        private void DrawNode(UpgradeTreeNodeDef node, Rect nodeRect)
         {
             UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
+            int currentProgress = treeHandler.GetNodeProgress(node);
+            bool isFullyUnlocked = treeHandler.IsNodeFullyUnlocked(node);
 
-            GUI.color = GetNodeColor(node);
+            GUI.color = treeHandler.GetNodeColor(node, currentProgress);
             GUI.DrawTexture(nodeRect, skin.NodeTexture);
             GUI.color = Color.white;
+
+            if (currentProgress > 0 && !isFullyUnlocked)
+            {
+                float progressPercentage = (float)currentProgress / node.upgrades.Count;
+                Rect progressRect = nodeRect;
+                progressRect.height *= progressPercentage;
+                progressRect.y = nodeRect.yMax - progressRect.height;
+
+                GUI.color = Color.red;
+                GUI.DrawTexture(progressRect, skin.NodeTexture);
+                GUI.color = Color.white;
+            }
+
             DrawNodeIconBG(node, nodeRect);
             DrawNodeIcon(node, nodeRect);
-            //DrawNodeLabel(node, nodeRect);
-            //DrawPathLabel(node, nodeRect);
+            DrawNodeBadge(node, nodeRect);
 
+            HandleNodeClick(nodeRect, node, canUnlockResult);
+
+            if (Mouse.IsOver(nodeRect))
+            {
+                DrawDescription(nodeRect, node, currentProgress);
+            }
+        }
+
+        private void DrawNodeBadge(UpgradeTreeNodeDef node, Rect nodeRect)
+        {
+            int progress = treeHandler.GetNodeProgress(node);
+            string label = $"{progress}/{node.upgrades.Count}";
+
+            Vector2 labelSize = Text.CalcSize(label);
+
+            float xPos = nodeRect.x + (nodeRect.width - labelSize.x) / 2; 
+            float yPos = nodeRect.y - labelSize.y - 2f;
+
+            Rect badgeRect = new Rect(xPos, yPos, labelSize.x, labelSize.y);
+
+            Widgets.Label(badgeRect, label);
+        }
+
+        private void HandleNodeClick(Rect nodeRect, UpgradeTreeNodeDef node, UnlockResult canUnlockResult)
+        {
             if (Widgets.ButtonInvisible(nodeRect))
             {
                 if (canUnlockResult.Success)
@@ -103,7 +139,17 @@ namespace Protean
                     }
                     else
                     {
-                        treeHandler.UnlockUpgrade(node.upgrade);
+                        if (!treeHandler.IsNodeFullyUnlocked(node))
+                        {
+                            int progress = treeHandler.GetNodeProgress(node);
+
+                            if (node.HasUpgrade(progress + 1))
+                            {
+                                treeHandler.UnlockUpgrade(node.GetUpgrade(progress + 1));
+                            }
+                        }
+                       
+                       
                     }
 
                     // If unlock succeeded and node has a path that can be selected, do it immediately
@@ -116,7 +162,7 @@ namespace Protean
                         if (pathResult.Success)
                         {
                             var predecessors = node.GetPredecessors(treeDef)
-                                                 .Where(p => treeHandler.IsNodeUnlocked(p));
+                                                 .Where(p => treeHandler.IsNodeFullyUnlocked(p));
                             foreach (var predecessor in predecessors)
                             {
                                 activeAnimations.Add(new ConnectionAnimation
@@ -156,236 +202,144 @@ namespace Protean
                     Messages.Message(canUnlockResult.Message, MessageTypeDefOf.RejectInput);
                 }
             }
+        }
 
-            if (Mouse.IsOver(nodeRect))
+        private void OnUpgradeUnlocked(UpgradeTreeNodeDef node)
+        {
+            if (treeHandler.IsNodeFullyUnlocked(node))
             {
-                DrawDescription(nodeRect, node);
+                HandleFullyUnlockedNode(node);
+
+                var predecessors = node.GetPredecessors(treeDef)
+                    .Where(p => treeHandler.IsNodeFullyUnlocked(p));
+
+                foreach (var predecessor in predecessors)
+                {
+                    activeAnimations.Add(new ConnectionAnimation
+                    {
+                        startTime = Time.time,
+                        duration = 0.5f,
+                        startPos = nodePositions[predecessor].center,
+                        endPos = nodePositions[node].center,
+                        color = skin.unlockedNodeColor
+                    });
+                }
             }
         }
-        private void HandleNodeOrPathClick(UpgradeTreeNodeDef node, UnlockResult canUnlockResult)
+
+        private void HandleFullyUnlockedNode(UpgradeTreeNodeDef node)
         {
-            // Check if this is a path selection click
-            if (node.type == NodeType.Branch &&
-                treeHandler.IsNodeUnlocked(node) &&
-                node.BelongsToUpgradePath &&
-                node.path != null)
+            if (node.BelongsToUpgradePath &&
+                node.path != null &&
+                !treeHandler.IsPathSelected(node.path) &&
+                treeHandler.CanSelectPath(node.path))
             {
-                // Handle path selection
-                if (treeHandler.CanSelectPath(node.path))
-                {
-                    UnlockResult result = treeHandler.SelectPath(node.path);
-                    if (result.Success)
-                    {
-                        var predecessors = node.GetPredecessors(treeDef)
-                                             .Where(p => treeHandler.IsNodeUnlocked(p));
-                        foreach (var predecessor in predecessors)
-                        {
-                            activeAnimations.Add(new ConnectionAnimation
-                            {
-                                startTime = Time.time,
-                                duration = 0.5f,
-                                startPos = nodePositions[predecessor].center,
-                                endPos = nodePositions[node].center,
-                                color = skin.unlockedNodeColor
-                            });
-                        }
-                        Log.Message($"Selected {node.path.defName} upgrade path.");
-                        Messages.Message($"Selected {node.path.defName} upgrade path.", MessageTypeDefOf.NeutralEvent);
-                    }
-                    else
-                    {
-                        Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
-                    }
-                }
-                else
-                {
-                    Messages.Message("Cannot select this path - conflicts with existing selection", MessageTypeDefOf.RejectInput);
-                }
+                HandlePathSelection(node);
             }
-            // Otherwise handle as a normal node unlock
-            else if (canUnlockResult.Success)
+        }
+        private void HandlePathSelection(UpgradeTreeNodeDef node)
+        {
+            if (treeHandler.CanSelectPath(node.path))
             {
-                if (treeHandler is ActiveTreeHandler activeHandler)
+                UnlockResult result = treeHandler.SelectPath(node.path);
+                if (result.Success)
                 {
-                    UnlockResult result = activeHandler.TryUnlockNode(node);
-                    if (!result.Success)
+                    var predecessors = node.GetPredecessors(treeDef)
+                        .Where(p => treeHandler.IsNodeFullyUnlocked(p));
+
+                    foreach (var predecessor in predecessors)
                     {
-                        Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
+                        activeAnimations.Add(new ConnectionAnimation
+                        {
+                            startTime = Time.time,
+                            duration = 0.5f,
+                            startPos = nodePositions[predecessor].center,
+                            endPos = nodePositions[node].center,
+                            color = skin.unlockedNodeColor
+                        });
                     }
+                    Messages.Message($"Selected {node.path.defName} upgrade path.", MessageTypeDefOf.NeutralEvent);
                 }
                 else
                 {
-                    treeHandler.UnlockUpgrade(node.upgrade);
+                    Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
                 }
             }
             else
             {
-                Messages.Message(canUnlockResult.Message, MessageTypeDefOf.RejectInput);
-            }
-        }
-        private void HandlePathSelectionClick(UpgradeTreeNodeDef node, Rect nodeRect)
-        {
-            if (node.type == NodeType.Branch && treeHandler.IsNodeUnlocked(node) && node.BelongsToUpgradePath && node.path != null && treeHandler.CanSelectPath(node.path))
-            {
-                if (Widgets.ButtonInvisible(nodeRect))
-                {
-                    if (treeHandler.CanSelectPath(node.path))
-                    {
-                        UnlockResult result = treeHandler.SelectPath(node.path);
-                        if (result.Success)
-                        {
-                            var predecessors = node.GetPredecessors(treeDef)
-                                                 .Where(p => treeHandler.IsNodeUnlocked(p));
-
-                            foreach (var predecessor in predecessors)
-                            {
-                                activeAnimations.Add(new ConnectionAnimation
-                                {
-                                    startTime = Time.time,
-                                    duration = 0.5f,
-                                    startPos = nodePositions[predecessor].center,
-                                    endPos = nodePositions[node].center,
-                                    color = skin.unlockedNodeColor
-                                });
-                            }
-                            Log.Message($"Selected {node.path.defName} upgrade path.");
-                            Messages.Message($"Selected {node.path.defName} upgrade path.", MessageTypeDefOf.NeutralEvent);
-                        }
-                        else
-                        {
-                            Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
-                        }
-                    }
-                    else
-                    {
-                        Messages.Message("Cannot select this path - conflicts with existing selection", MessageTypeDefOf.RejectInput);
-                    }
-                    return;
-                }
-            }
-        }
-
-        private void HandleNodeClick(UpgradeTreeNodeDef node, UnlockResult canUnlockResult)
-        {
-            if (canUnlockResult.Success)
-            {
-                if (treeHandler is ActiveTreeHandler activeHandler)
-                {
-                    UnlockResult result = activeHandler.TryUnlockNode(node);
-                    if (!result.Success)
-                    {
-                        Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
-                    }
-                }
-                else
-                {
-                    treeHandler.UnlockUpgrade(node.upgrade);
-                }
-            }
-            else
-            {
-                Messages.Message(canUnlockResult.Message, MessageTypeDefOf.RejectInput);
-            }
-        }
-
-        private void DrawPathLabel(UpgradeTreeNodeDef node, Rect nodeRect)
-        {
-            if (node.BelongsToUpgradePath && !allNodes.Any(n => n != node && n.path == node.path && nodePositions[n].y < nodePositions[node].y))
-            {
-                Text.Anchor = TextAnchor.LowerCenter;
-                Text.Font = skin.labelFont;
-
-                float pathLabelWidth = Text.CalcSize(node.path.defName).x;
-                Rect pathLabelRect = new Rect(
-                    nodeRect.x + (nodeRect.width / 2) - (pathLabelWidth / 2),
-                    nodeRect.y - skin.pathLabelOffset,
-                    pathLabelWidth,
-                    20f
-                );
-
-                Color pathColor = GetPathColor(node.path);
-                GUI.color = pathColor;
-                Widgets.DrawHighlight(pathLabelRect);
-                Widgets.Label(pathLabelRect, node.path.defName);
-                GUI.color = Color.white;
-                Text.Anchor = TextAnchor.UpperLeft;
-            }
-        }
-
-        private void DrawNodeLabel(UpgradeTreeNodeDef node, Rect nodeRect)
-        {
-            if (node.upgrade?.label != null)
-            {
-                Text.Anchor = TextAnchor.UpperCenter;
-                Text.Font = skin.labelFont;
-                GUI.color = skin.labelColor;
-
-                float labelWidth = Text.CalcSize(node.upgrade.label).x;
-                Rect labelRect = new Rect(
-                    nodeRect.x + (nodeRect.width / 2) - (labelWidth / 2),
-                    nodeRect.yMax + skin.labelOffset,
-                    labelWidth,
-                    25f
-                );
-
-                Widgets.DrawHighlight(labelRect);
-                Widgets.Label(labelRect, node.upgrade.label);
-
-                GUI.color = Color.white;
-                Text.Anchor = TextAnchor.UpperLeft;
+                Messages.Message("Cannot select this path - conflicts with existing selection", MessageTypeDefOf.RejectInput);
             }
         }
 
         private void DrawNodeIcon(UpgradeTreeNodeDef node, Rect nodeRect)
         {
             Rect iconRect = nodeRect.ContractedBy(8f);
-
-
-            Texture2D icon = null;
-
-            if (!string.IsNullOrEmpty(node.upgrade?.uiIcon))
+            if (!node.upgrades.NullOrEmpty() && !string.IsNullOrEmpty(node.upgrades[0].uiIcon))
             {
-                icon = ContentFinder<Texture2D>.Get(node.upgrade.uiIcon);
-            }
-            else
-            {
-                icon = ContentFinder<Texture2D>.Get("Things/Building/Misc/DropBeacon");
-            }
-
-            if (icon != null)
-            {
-                Widgets.DrawTextureFitted(iconRect, icon, 1f);
-            }
-        }
-
-        private void DrawNodeIconBG(UpgradeTreeNodeDef node, Rect nodeRect)
-        {
-            if (!string.IsNullOrEmpty(node.upgrade?.uiIcon))
-            {
-                Rect iconRect = nodeRect.ContractedBy(1f);
-                Texture2D icon = ContentFinder<Texture2D>.Get(node.upgrade.uiIcon);
+                var icon = ContentFinder<Texture2D>.Get(node.upgrades[0].uiIcon);
                 if (icon != null)
                 {
                     Widgets.DrawTextureFitted(iconRect, icon, 1f);
                 }
             }
         }
-
-        private void DrawToolbar(Rect rect)
+        private void DrawNodeIconBG(UpgradeTreeNodeDef node, Rect nodeRect)
         {
-            Widgets.DrawMenuSection(rect);
-            displayStrategy.DrawToolBar(rect);
+            //Rect iconRect = nodeRect.ContractedBy(1f);
+            //Texture2D icon = skin.NodeBackgroundTexture;
+            //if (icon != null)
+            //{
+            //    Widgets.DrawTextureFitted(iconRect, icon, 1f);
+            //}
         }
 
-        private Color GetPathColor(UpgradePathDef path)
+        private void DrawDescription(Rect nodeRect, UpgradeTreeNodeDef node, int currentProgress)
         {
-            if (treeHandler.IsPathSelected(path))
-                return skin.pathSelectedColor;
+            bool isFullyUnlocked = treeHandler.IsNodeFullyUnlocked(node);
+            UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
 
-            if (treeHandler.CanSelectPath(path))
-                return skin.pathAvailableColor;
+            string tooltip = "";
 
-            return skin.pathExcludedColor;
+            if (currentProgress < node.upgrades.Count)
+            {
+                var nextUpgrade = node.upgrades[currentProgress];
+                tooltip = nextUpgrade?.description ?? "Unknown upgrade";
+                tooltip += $"\n\nNext Upgrade: {nextUpgrade?.label ?? "Unknown"}";
+            }
+            else
+            {
+                tooltip = "All upgrades unlocked";
+            }
+
+            tooltip += $"\n\nProgress: {currentProgress}/{node.upgrades.Count}";
+
+            if (currentProgress > 0)
+            {
+                tooltip += "\n\nUnlocked Upgrades:";
+                for (int i = 0; i < currentProgress; i++)
+                {
+                    tooltip += $"\n- {node.upgrades[i].label}";
+                }
+            }
+
+            tooltip += "\n=== Debug Info ===";
+            tooltip += $"\nNode: {node.defName}";
+            tooltip += $"\nType: {node.type}";
+            tooltip += $"\nFully Unlocked: {isFullyUnlocked}";
+            tooltip += $"\nCan Unlock Next: {canUnlockResult.Success}";
+
+            if (node.BelongsToUpgradePath)
+            {
+                tooltip += $"\nPath: {node.path.defName}";
+                tooltip += $"\nPath Selected: {treeHandler.IsPathSelected(node.path)}";
+            }
+
+            if (!isFullyUnlocked && !canUnlockResult.Success)
+            {
+                tooltip += $"\n\nUnlock Error: {canUnlockResult.Message}";
+            }
+
+            TooltipHandler.TipRegion(nodeRect, tooltip);
         }
 
         private void DrawConnections()
@@ -410,29 +364,35 @@ namespace Protean
             Vector2 start = nodePositions[from].center;
             Vector2 end = nodePositions[to].center;
 
-            bool isPathActive = treeHandler.IsNodeUnlocked(from) ||
-                              treeHandler.IsNodeUnlocked(to);
-
-            Color lineColor;
-            if (treeHandler.IsNodeUnlocked(from) && treeHandler.IsNodeUnlocked(to))
-            {
-                lineColor = skin.unlockedConnectionColor;
-            }
-            else if (isPathActive)
-            {
-                lineColor = skin.activeConnectionColor;
-            }
-            else
-            {
-                lineColor = skin.inactiveConnectionColor;
-            }
-
+            Color lineColor = GetPathStatusColor(from, to);
             Widgets.DrawLine(start, end, lineColor, skin.connectionThickness);
 
             if (skin.showConnectionArrows && Vector2.Distance(start, end) > skin.nodeSize)
             {
                 DrawConnectionArrow(start, end, lineColor);
             }
+        }
+
+
+        private Color GetPathStatusColor(UpgradeTreeNodeDef from, UpgradeTreeNodeDef to)
+        {
+            Color lineColor;
+            switch (treeHandler.GetPathStatusBetweenNodes(from, to))
+            {
+                case BaseTreeHandler.PathStatus.Unlocked:
+                    lineColor = skin.unlockedConnectionColor;
+                    break;
+                case BaseTreeHandler.PathStatus.Active:
+                    lineColor = skin.activeConnectionColor;
+                    break;
+                case BaseTreeHandler.PathStatus.Locked:
+                    lineColor = skin.inactiveConnectionColor;
+                    break;
+                default:
+                    lineColor = Color.gray;
+                    break;
+            }
+            return lineColor;
         }
 
         private void DrawConnectionArrow(Vector2 start, Vector2 end, Color color)
@@ -449,78 +409,10 @@ namespace Protean
             Widgets.DrawLine(arrowBase, arrowPoint2, color, skin.connectionThickness);
         }
 
-        private void DrawDescription(Rect nodeRect, UpgradeTreeNodeDef node)
+        private void DrawToolbar(Rect rect)
         {
-            bool isUnlocked = treeHandler.IsNodeUnlocked(node);
-            UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
-            string tooltip = node.upgrade?.description ?? "Unknown upgrade";
-
-            tooltip += "\n\n=== Debug Info ===";
-            tooltip += $"\nNode: {node.defName}";
-            tooltip += $"\nType: {node.type}";
-            tooltip += $"\nUnlocked: {isUnlocked}";
-            tooltip += $"\nCan Unlock: {canUnlockResult.Success}";
-
-            if (node.BelongsToUpgradePath)
-            {
-                tooltip += $"\nPath: {node.path.defName}";
-                tooltip += $"\nPath Selected: {treeHandler.IsPathSelected(node.path)}";
-
-                if (node.path != null && node.path.exclusiveWith != null)
-                {
-                    foreach (var item in node.path.exclusiveWith)
-                    {
-                        tooltip += $"\nIs Exlcusive With: {item.defName} path.";
-                    }
-                }
-            }
-
-            tooltip += $"\nConnections: {node.ConnectionCount}";
-            if (node.connections != null && node.connections.Any())
-            {
-                tooltip += "\nConnected to:";
-                foreach (var conn in node.connections)
-                {
-                    tooltip += $"\n - {conn.defName} (Unlocked: {treeHandler.IsNodeUnlocked(conn)})";
-                }
-            }
-
-            var predecessors = node.GetPredecessors(treeDef).ToList();
-            tooltip += $"\nPredecessors: {predecessors.Count}";
-            if (predecessors.Any())
-            {
-                tooltip += "\nPreceded by:";
-                foreach (var pred in predecessors)
-                {
-                    tooltip += $"\n - {pred.defName} (Unlocked: {treeHandler.IsNodeUnlocked(pred)})";
-                }
-            }
-
-            if (!isUnlocked && !canUnlockResult.Success)
-            {
-                tooltip += $"\n\nUnlock Error: {canUnlockResult.Message}";
-            }
-
-            TooltipHandler.TipRegion(nodeRect, tooltip);
-        }
-
-        private Color GetNodeColor(UpgradeTreeNodeDef node)
-        {
-            bool isUnlocked = treeHandler.IsNodeUnlocked(node);
-
-            if (node.BelongsToUpgradePath)
-            {
-                if (isUnlocked)
-                    return skin.unlockedNodeColor;
-
-                if (treeHandler.IsPathSelected(node.path))
-                    return skin.pathSelectedColor;
-
-                return treeHandler.CanSelectPath(node.path) ? skin.pathAvailableColor : skin.pathExcludedColor;
-            }
-
-            UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
-            return isUnlocked ? skin.unlockedNodeColor : (canUnlockResult.Success ? skin.availableNodeColor : skin.lockedNodeColor);
+            Widgets.DrawMenuSection(rect);
+            displayStrategy.DrawToolBar(rect);
         }
     }
 }
