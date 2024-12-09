@@ -13,7 +13,7 @@ const Node = ({
 }) => {
   return (
     <div
-      className={`absolute p-4 rounded-lg shadow-lg w-40 cursor-move
+      className={`absolute p-4 rounded-lg shadow-lg w-20 cursor-move
         ${node.type === 'Start' ? 'bg-green-100' : 'bg-white'}
         ${node.type === 'Branch' ? 'bg-yellow-100' : ''}
         ${selected ? 'ring-2 ring-blue-500' : ''}

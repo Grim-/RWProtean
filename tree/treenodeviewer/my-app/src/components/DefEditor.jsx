@@ -101,7 +101,6 @@ const DefEditor = ({ nodes, setNodes, paths, setPaths }) => {
         </select>
       );
     }
-    // Add more property type renderers as needed
   };
 
   return (

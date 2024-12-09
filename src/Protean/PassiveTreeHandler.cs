@@ -27,10 +27,6 @@ namespace Protean
 
         protected override UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node)
         {
-            //// Start nodes don't require points
-            //if (node.type == UpgradeTreeNodeDef.NodeType.Start)
-            //    return UnlockResult.Succeeded();
-
             if (availablePoints < node.upgrade.pointCost)
             {
                 Log.Message($"Insufficient points for node {node.defName}. Available: {availablePoints}, Required: {node.upgrade.pointCost}");
