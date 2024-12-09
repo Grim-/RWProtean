@@ -90,6 +90,8 @@
     <Compile Include="DisplayStrategies\TreeDisplayStrategyDef.cs" />
     <Compile Include="NodeFadeAnimation.cs" />
     <Compile Include="PassiveTreeHandler.cs" />
+    <Compile Include="Tree\BranchPathData.cs" />
+    <Compile Include="Tree\NodeType.cs" />
     <Compile Include="Tree\UpgradeTreeSkinDef.cs" />
     <Compile Include="UIAnimationState.cs" />
     <Compile Include="UnlockResult.cs" />

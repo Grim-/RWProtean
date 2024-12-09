@@ -165,7 +165,7 @@ namespace Protean
         private void HandleNodeOrPathClick(UpgradeTreeNodeDef node, UnlockResult canUnlockResult)
         {
             // Check if this is a path selection click
-            if (node.type == UpgradeTreeNodeDef.NodeType.Branch &&
+            if (node.type == NodeType.Branch &&
                 treeHandler.IsNodeUnlocked(node) &&
                 node.BelongsToUpgradePath &&
                 node.path != null)
@@ -225,7 +225,7 @@ namespace Protean
         }
         private void HandlePathSelectionClick(UpgradeTreeNodeDef node, Rect nodeRect)
         {
-            if (node.type == UpgradeTreeNodeDef.NodeType.Branch && treeHandler.IsNodeUnlocked(node) && node.BelongsToUpgradePath && node.path != null && treeHandler.CanSelectPath(node.path))
+            if (node.type == NodeType.Branch && treeHandler.IsNodeUnlocked(node) && node.BelongsToUpgradePath && node.path != null && treeHandler.CanSelectPath(node.path))
             {
                 if (Widgets.ButtonInvisible(nodeRect))
                 {

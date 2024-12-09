@@ -128,7 +128,7 @@ namespace Protean
 
         private List<UpgradeTreeNodeDef> FindStartNodes(List<UpgradeTreeNodeDef> nodes)
         {
-            return nodes.FindAll(n => n.type == UpgradeTreeNodeDef.NodeType.Start);
+            return nodes.FindAll(n => n.type == NodeType.Start);
         }
 
         private Dictionary<string, List<UpgradeTreeNodeDef>> GroupNodesByPath(List<UpgradeTreeNodeDef> nodes)

@@ -99,7 +99,7 @@ namespace Protean
                 var availableNodes = treeDef.GetAllNodes()
                     .Where(n => !IsNodeUnlocked(n) &&
                                ValidateUpgradePath(n) &&
-                               n.type != UpgradeTreeNodeDef.NodeType.Start);
+                               n.type != NodeType.Start);
 
                 foreach (var node in availableNodes)
                 {
@@ -147,7 +147,7 @@ namespace Protean
                     int spentPoints = 0;
                     foreach (var node in unlockedNodes)
                     {
-                        if (node.type != UpgradeTreeNodeDef.NodeType.Start && node.upgrade != null)
+                        if (node.type != NodeType.Start && node.upgrade != null)
                         {
                             spentPoints += node.upgrade.pointCost;
                         }

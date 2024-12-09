@@ -94,7 +94,7 @@ namespace Protean
                 return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Already unlocked");
 
             // Prerequisites check
-            if (node.type != UpgradeTreeNodeDef.NodeType.Start)
+            if (node.type != NodeType.Start)
             {
                 bool hasUnlockedPredecessor = node.GetPredecessors(treeDef).Any(IsNodeUnlocked);
                 if (!hasUnlockedPredecessor)
@@ -102,7 +102,7 @@ namespace Protean
             }
 
             // For non-branch nodes that belong to a path, that path must be selected
-            if (node.type != UpgradeTreeNodeDef.NodeType.Branch && node.path != null && !IsPathSelected(node.path))
+            if (node.type != NodeType.Branch && node.path != null && !IsPathSelected(node.path))
             {
                 return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, "Must select path at branch point first");
             }
@@ -122,7 +122,7 @@ namespace Protean
             {
                 foreach (var item in this.treeDef.GetAllNodes())
                 {
-                    if (item.type == UpgradeTreeNodeDef.NodeType.Start && !IsNodeUnlocked(item))
+                    if (item.type == NodeType.Start && !IsNodeUnlocked(item))
                     {
                         UnlockNode(item);
                     }
@@ -171,7 +171,7 @@ namespace Protean
         protected virtual bool ValidateUpgradePath(UpgradeTreeNodeDef node)
         {
             // Branch nodes can be used for path selection if their path is available
-            if (node.type == UpgradeTreeNodeDef.NodeType.Branch)
+            if (node.type == NodeType.Branch)
                 return node.path != null && CanSelectPath(node.path);
 
             // Non-branch nodes require their path to be selected already
@@ -195,7 +195,7 @@ namespace Protean
             Scribe_Collections.Look(
                 ref activeEffects,
                 "activeEffects",
-                LookMode.Def,    
+                LookMode.Def,
                 LookMode.Deep
             );
 
