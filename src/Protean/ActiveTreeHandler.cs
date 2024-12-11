@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace Protean
@@ -6,27 +7,18 @@ namespace Protean
     public class ActiveTreeHandler : BaseTreeHandler
     {
         private int availablePoints;
+        public ActiveTreeHandler()
+        {
+
+        }
 
         public ActiveTreeHandler(Pawn pawn, Gene_Parasite gene, UpgradeTreeDef treeDef)
             : base(pawn, gene, treeDef)
         {
-            TryUnlockNextUpgrade(this.treeDef.nodes[0], true);
+            TryUnlockNextUpgrade(this.treeDef.RootNode, true);
         }
 
-        public ActiveTreeHandler()
-        {
-        }
-
-        private void UnlockBasicNode()
-        {
-            var basicNode = treeDef.GetAllNodes().FirstOrDefault(n => n.type != NodeType.Start);
-            if (basicNode != null)
-            {
-                TryUnlockNextUpgrade(basicNode);
-            }
-        }
-
-        protected override UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node)
+        protected override UnlockResult ValidateTreeSpecificRules(UpgradeTreeNodeDef node)
         {
             if (node.type != NodeType.Start && !HasSelectedAPath())
             {
@@ -34,21 +26,22 @@ namespace Protean
             }
 
             int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count)
+            if (currentProgress >= node.UpgradeCount)
                 return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Already unlocked all upgrades in this node");
 
-            if (availablePoints < node.upgrades[currentProgress].pointCost)
+            if (availablePoints < node.GetUpgradeCost(currentProgress))
             {
                 return UnlockResult.Failed(UpgradeUnlockError.InsufficientPoints,
-                    string.Format("Requires {0} points", node.upgrades[currentProgress].pointCost));
+                    string.Format("Requires {0} points", node.GetUpgradeCost(currentProgress)));
             }
 
             return UnlockResult.Succeeded();
         }
 
-        public void AddPoints(int points)
+        public override void OnLevelUp(int newLevel)
         {
-            this.availablePoints += points;
+            base.OnLevelUp(newLevel);
+            this.availablePoints++;
         }
 
         public int GetAvailablePoints()
@@ -56,47 +49,33 @@ namespace Protean
             return availablePoints;
         }
 
-        public UnlockResult TryUnlockNode(UpgradeTreeNodeDef node)
+        public override UnlockResult TryUnlockNode(UpgradeTreeNodeDef node)
         {
-            UnlockResult result = CanUnlockNode(node);
+            UnlockResult result = base.TryUnlockNode(node);
             if (!result.Success)
             {
                 return result;
             }
 
             int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count)
+            if (currentProgress >= node.UpgradeCount)
             {
                 return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Node is already fully unlocked");
             }
 
-            int cost = node.upgrades[currentProgress].pointCost;
+            int cost = node.GetUpgradeCost(currentProgress);
             if (availablePoints < cost)
             {
                 return UnlockResult.Failed(UpgradeUnlockError.InsufficientPoints, $"Requires {cost} points");
             }
-
-            this.availablePoints -= cost;
+    
             UnlockResult unlockResult = TryUnlockNextUpgrade(node);
-
-            if (!unlockResult.Success)
+            if (unlockResult.Success)
             {
-                // Refund points if unlock failed
-                this.availablePoints += cost;
+                this.availablePoints -= cost;
             }
 
             return unlockResult;
-        }
-
-        public bool HasSufficientPointsForNode(UpgradeTreeNodeDef node)
-        {
-            if (node == null || node.upgrades.NullOrEmpty()) return false;
-            if (node.type != NodeType.Start && !HasSelectedAPath()) return false;
-
-            int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count) return false;
-
-            return availablePoints >= node.upgrades[currentProgress].pointCost;
         }
 
         public override void OnPathSelected(UpgradePathDef path)
@@ -108,24 +87,6 @@ namespace Protean
         {
             base.ExposeData();
             Scribe_Values.Look(ref availablePoints, "availablePoints", 0);
-
-            if (Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-                if (unlockedNodes.Count == 0)
-                {
-                    UnlockStartNode();
-                    UnlockBasicNode();
-                }
-            }
-        }
-
-        public int GetNextUpgradeCost(UpgradeTreeNodeDef node)
-        {
-            int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count)
-                return 0;
-
-            return node.upgrades[currentProgress].pointCost;
         }
 
         public int GetTotalPointsSpent()
@@ -134,19 +95,28 @@ namespace Protean
             foreach (var node in treeDef.GetAllNodes())
             {
                 int progress = GetNodeProgress(node);
-                for (int i = 0; i < progress && i < node.upgrades.Count; i++)
+                for (int i = 0; i < progress && i < node.UpgradeCount; i++)
                 {
-                    total += node.upgrades[i].pointCost;
+                    total += node.GetUpgradeCost(i);
                 }
             }
             return total;
         }
 
-        public bool HasAvailableUpgrades()
+        public override void DrawToolBar(Rect rect)
         {
-            return treeDef.GetAllNodes().Any(node =>
-                CanUnlockNode(node).Success &&
-                HasSufficientPointsForNode(node));
+            base.DrawToolBar(rect);
+
+            rect = rect.ContractedBy(2);
+
+            float currentX = rect.x;
+            float labelWidth = 60f;
+            string label = $"Talent Points Available {availablePoints}";
+            Vector2 labelSize = Text.CalcSize(label);
+            currentX += labelSize.x;
+            Rect labelRect = new Rect(currentX, rect.y, labelSize.x, labelSize.y);
+            Widgets.Label(labelRect, label);
+            currentX += labelWidth;
         }
     }
 }

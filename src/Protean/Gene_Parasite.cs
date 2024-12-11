@@ -8,31 +8,27 @@ namespace Protean
 {
     public class Gene_Parasite : Gene
     {
-        private Dictionary<UpgradeDef, List<UpgradeEffect>> activeEffects =
-                    new Dictionary<UpgradeDef, List<UpgradeEffect>>();
-
-
-        private HashSet<UpgradeDef> unlockedUpgrades = new HashSet<UpgradeDef>();
-        private HashSet<UpgradePathDef> selectedPassivePaths = new HashSet<UpgradePathDef>();
-        private HashSet<UpgradePathDef> selectedActivePaths = new HashSet<UpgradePathDef>();
-
-        public PassiveTreeHandler passiveTree;
-        public ActiveTreeHandler activeTree;
+        private PassiveTreeHandler passiveTree;
+        private ActiveTreeHandler activeTree;
 
         private const int MaxParasiteLevel = 300;
         private const int MaxBondLevel = 20;
         private const float BaseBond = 100f;
         private const float BondingPerHour = 1f;
 
-        private int parasiteLevel = 1;
-        private int bondLevel = 0;
-        private float currentLevelBond = 0f;
-        private int evolutionPoints = 0;
+        private float currentBond = 0f;
 
-        public int ParasiteLevel => parasiteLevel;
+
+        private int currentLevel = 1;
+        public int CurrentLevel => currentLevel;
+
+        private int bondLevel = 0;
         public int BondLevel => bondLevel;
-        public float CurrentBondProgress => currentLevelBond / MaxBondPerLevel(bondLevel);
-        public int EvolutionPoints => evolutionPoints;
+        public float CurrentBondProgress => currentBond / MaxBondPerLevel(bondLevel);
+
+
+        private int talentPoints = 0;
+        public int TalentPointsAvailable => talentPoints;
 
         private float MaxBondPerLevel(int level) => (level + 1) * BaseBond;
         public override void PostMake()
@@ -66,11 +62,11 @@ namespace Protean
         private void IncreaseBond(float amount)
         {
             if (bondLevel >= MaxBondLevel) return;
-            currentLevelBond += amount;
+            currentBond += amount;
             float maxBond = MaxBondPerLevel(bondLevel);
 
             int levelsToGain = 0;
-            float remainingBond = currentLevelBond;
+            float remainingBond = currentBond;
             int tempLevel = bondLevel;
 
             while (remainingBond >= maxBond && tempLevel < MaxBondLevel)
@@ -83,7 +79,7 @@ namespace Protean
 
             if (levelsToGain > 0)
             {
-                currentLevelBond = remainingBond;
+                currentBond = remainingBond;
                 GainBondLevel(levelsToGain);
             }
         }
@@ -91,35 +87,31 @@ namespace Protean
         private void GainBondLevel(int levels)
         {
             int oldLevel = bondLevel;
-            bondLevel = Math.Min(bondLevel + levels, MaxBondLevel);
+            int gainedLevels = levels;
 
-            if (passiveTree != null)
-            {
-                passiveTree.OnLevelUp(bondLevel);
-            }
-            if (activeTree != null)
-            {
-                activeTree.AddPoints(levels);
-            }
+            int newLevel = oldLevel + gainedLevels;
+            bondLevel = Math.Min(newLevel, MaxBondLevel);
 
+            passiveTree?.OnLevelUp(bondLevel);
+            activeTree?.OnLevelUp(levels);
             Messages.Message($"{pawn.Label} gained {levels} bond level{(levels > 1 ? "s" : "")} with their parasite (level = {bondLevel})", MessageTypeDefOf.PositiveEvent);
         }
 
         public bool CanAffordUpgrade(UpgradeDef upgrade)
         {
-            return HasEvolutionPoints(upgrade.pointCost);
+            return HasTalentPointsAvailable(upgrade.pointCost);
         }
 
-        private bool HasEvolutionPoints(int amount)
+        private bool HasTalentPointsAvailable(int amount)
         {
-            return evolutionPoints >= amount;
+            return talentPoints >= amount;
         }
 
-        private void UseEvolutionPoints(int amount)
+        private void UseTalentPoints(int amount)
         {
-            if (HasEvolutionPoints(amount))
+            if (HasTalentPointsAvailable(amount))
             {
-                evolutionPoints -= amount;
+                talentPoints -= amount;
             }
         }
 
@@ -129,8 +121,7 @@ namespace Protean
             {
                 defaultLabel = "DEV: Increase Bond Level",
                 defaultDesc = "Increase Bond Level by 1 (Debug)",
-                action = () => GainBondLevel(1),
-                
+                action = () => GainBondLevel(1),          
             };
 
             yield return new Command_Action
@@ -150,18 +141,10 @@ namespace Protean
             Scribe_Deep.Look(ref passiveTree, "passiveTree");
             Scribe_Deep.Look(ref activeTree, "activeTree");
 
-            Scribe_Collections.Look(ref unlockedUpgrades, "unlockedUpgrades", LookMode.Def);
-            Scribe_Values.Look(ref parasiteLevel, "parasiteLevel", 1);
+            Scribe_Values.Look(ref currentLevel, "currentLevel", 1);
             Scribe_Values.Look(ref bondLevel, "bondLevel", 0);
-            Scribe_Values.Look(ref currentLevelBond, "currentLevelBond", 0f);
-            Scribe_Values.Look(ref evolutionPoints, "evolutionPoints", 0);
-            Scribe_Collections.Look(ref selectedPassivePaths, "selectedPassivePaths", LookMode.Def);
-            Scribe_Collections.Look(ref selectedActivePaths, "selectedActivePaths", LookMode.Def);
-
-            if (Scribe.mode == LoadSaveMode.LoadingVars)
-            {
-                activeEffects.Clear();
-            }
+            Scribe_Values.Look(ref currentBond, "currentBond", 0f);
+            Scribe_Values.Look(ref talentPoints, "talentPoints", 0);
         }
     }
 }

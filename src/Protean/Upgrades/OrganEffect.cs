@@ -12,43 +12,41 @@ namespace Protean
         public bool isAddition;
         private List<Hediff> addedParts = new List<Hediff>();
 
-        public override void Apply(Pawn pawn)
+
+        protected override bool IsEffectPresent(Pawn pawn)
         {
-            if (addedParts.Any())
+            addedParts.RemoveAll(part => part == null || !pawn.health.hediffSet.HasHediff(part.def));
+            bool targetOrganExists = pawn.health.hediffSet.hediffs.Any(h => h.def == addedOrganHediff);
+            if (isAddition)
             {
-                // If tracked parts are missing, remove them from our list
-                addedParts.RemoveAll(part => part == null || !pawn.health.hediffSet.HasHediff(part.def));
+                bool AnyAddedPartsExist = addedParts.Any();
+
+                return AnyAddedPartsExist || targetOrganExists;
             }
 
-            // Only add new parts
-            if (!addedParts.Any())
-            {
-                IEnumerable<BodyPartRecord> targetParts = pawn.health.hediffSet.GetNotMissingParts()
-                    .Where(part => part.def == targetOrgan);
+            var targetParts = pawn.health.hediffSet.GetNotMissingParts()
+                .Where(part => part.def == targetOrgan);
 
-                if (isAddition)
-                {
-                    BodyPartRecord randomParent = targetParts.RandomElement();
-                    if (randomParent != null)
-                    {
-                        var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, randomParent);
-                        pawn.health.AddHediff(hediff, randomParent);
-                        addedParts.Add(hediff);
-                    }
-                }
-                else
-                {
-                    foreach (BodyPartRecord part in targetParts)
-                    {
-                        var hediff = HediffMaker.MakeHediff(addedOrganHediff, pawn, part);
-                        pawn.health.AddHediff(hediff, part);
-                        addedParts.Add(hediff);
-                    }
-                }
-            }
+            return targetParts.Count() > 0;
         }
 
-        public override void Remove(Pawn pawn)
+        protected override void Apply(Pawn pawn)
+        {
+            Hediff addedPart = null;
+
+            if (isAddition)
+            {
+                addedPart = pawn.health.AddHediff(addedOrganHediff);
+            }
+            else
+            {
+                BodyPartRecord foundPart = pawn.health.hediffSet.GetNotMissingParts().Where(x => x.def == targetOrgan).FirstOrDefault();
+                addedPart = pawn.health.AddHediff(addedOrganHediff, foundPart);
+            }
+            addedParts.Add(addedPart);
+        }
+
+        protected override void Remove(Pawn pawn)
         {
             foreach (var part in addedParts)
             {
@@ -60,6 +58,7 @@ namespace Protean
 
         public override void ExposeData()
         {
+            base.ExposeData();
             Scribe_Defs.Look(ref targetOrgan, "targetOrgan");
             Scribe_Defs.Look(ref addedOrganHediff, "addedOrganHediff");
             Scribe_Values.Look(ref isAddition, "isAddition");

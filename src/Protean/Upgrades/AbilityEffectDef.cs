@@ -7,6 +7,7 @@ namespace Protean
     {
         public List<AbilityDef> abilities;
 
+        public override string Description => $"You gain the abilites.";
         public override UpgradeEffect CreateEffect()
         {
             return new AbilityEffect

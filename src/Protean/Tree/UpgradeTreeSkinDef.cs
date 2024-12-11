@@ -7,17 +7,24 @@ namespace Protean
     {
         // Background configuration
         public string backgroundTexturePath;
+        private string defaultbackgroundTexturePath = "UI/Tree/defaultbackground";
         public Color? backgroundColor;
 
         // Node appearance
-        public string defaultNodeTexturePath = "UI/TreePassiveBorder";
-        public float nodeSize = 45f;
-        public float nodeSpacing = 15f;
+        public string nodeTexturePath = "UI/Tree/defaultnode";
+        private string defaultNodeTexturePath = "UI/Tree/defaultnode";
+        public float nodeSize = 60f;
+        public float nodeSpacing = 10f;
 
         // Connection appearance
+        public string connectionTexturePath = "UI/Tree/defaultconnection";
+        private string defaultConnectionTexturePath = "UI/Tree/defaultconnection";
         public float connectionThickness = 1.5f;
         public bool showConnectionArrows = true;
         public float arrowSize = 10f;
+        public float connectionLinkSize = 20f;
+
+        public float windowMargin = 0f;
 
         // Color scheme
         public Color unlockedNodeColor = new Color(0.2f, 0.8f, 0.2f);
@@ -43,14 +50,37 @@ namespace Protean
 
         private Texture2D cachedBackgroundTexture;
         private Texture2D cachedNodeTexture;
+        private Texture2D cachedConnectionTexture;
+
+        private Texture2D LoadTexture(string customPath, string defaultPath, string textureType)
+        {
+            // Try loading custom texture if specified
+            if (!customPath.NullOrEmpty())
+            {
+                Texture2D customTexture = ContentFinder<Texture2D>.Get(customPath, false);
+                if (customTexture != null)
+                {
+                    return customTexture;
+                }
+                Log.Error($"Failed to load custom {textureType} texture at path: {customPath}. Falling back to default.");
+            }
+
+            // Load default texture
+            Texture2D defaultTexture = ContentFinder<Texture2D>.Get(defaultPath, false);
+            if (defaultTexture == null)
+            {
+                Log.Message($"Failed to load default {textureType} texture at path: {defaultPath}");
+            }
+            return defaultTexture;
+        }
 
         public Texture2D BackgroundTexture
         {
             get
             {
-                if (cachedBackgroundTexture == null && !backgroundTexturePath.NullOrEmpty())
+                if (cachedBackgroundTexture == null)
                 {
-                    cachedBackgroundTexture = ContentFinder<Texture2D>.Get(backgroundTexturePath);
+                    cachedBackgroundTexture = LoadTexture(backgroundTexturePath, defaultbackgroundTexturePath, "background");
                 }
                 return cachedBackgroundTexture;
             }
@@ -62,10 +92,23 @@ namespace Protean
             {
                 if (cachedNodeTexture == null)
                 {
-                    cachedNodeTexture = ContentFinder<Texture2D>.Get(defaultNodeTexturePath);
+                    cachedNodeTexture = LoadTexture(nodeTexturePath, defaultNodeTexturePath, "node");
                 }
                 return cachedNodeTexture;
             }
         }
+
+        public Texture2D ConnectionTexture
+        {
+            get
+            {
+                if (cachedConnectionTexture == null)
+                {
+                    cachedConnectionTexture = LoadTexture(connectionTexturePath, defaultConnectionTexturePath, "connection");
+                }
+                return cachedConnectionTexture;
+            }
+        }
+        public bool HasConnectionTexure => !string.IsNullOrEmpty(defaultConnectionTexturePath);
     }
 }

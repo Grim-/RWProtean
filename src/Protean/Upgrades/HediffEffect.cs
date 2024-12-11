@@ -7,22 +7,27 @@ namespace Protean
         public HediffDef hediffDef;
         private Hediff appliedHediff;
 
-        public override void Apply(Pawn pawn)
+
+
+        protected override bool IsEffectPresent(Pawn pawn)
         {
-            if (appliedHediff != null && !pawn.health.hediffSet.HasHediff(hediffDef))
+            // First try to find our tracked hediff
+            if (appliedHediff != null && pawn.health.hediffSet.HasHediff(hediffDef))
             {
-                appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
-                pawn.health.AddHediff(appliedHediff);
+                return true;
             }
-            // If we have no saved reference at all
-            else if (appliedHediff == null)
-            {
-                appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
-                pawn.health.AddHediff(appliedHediff);
-            }
+
+            // If our tracked hediff is gone, check if the type exists at all
+            return pawn.health.hediffSet.HasHediff(hediffDef);
         }
 
-        public override void Remove(Pawn pawn)
+        protected override void Apply(Pawn pawn)
+        {
+            appliedHediff = HediffMaker.MakeHediff(hediffDef, pawn);
+            pawn.health.AddHediff(appliedHediff);
+        }
+
+        protected override void Remove(Pawn pawn)
         {
             if (appliedHediff != null)
             {
@@ -33,6 +38,7 @@ namespace Protean
 
         public override void ExposeData()
         {
+            base.ExposeData();
             Scribe_Defs.Look(ref hediffDef, "hediffDef");
             Scribe_References.Look(ref appliedHediff, "appliedHediff");
         }

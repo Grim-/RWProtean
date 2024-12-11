@@ -8,13 +8,15 @@ namespace Protean
     {
         public int parasiteLevelRequired;
         public List<UpgradeDef> prerequisites;
-        public string uiIcon;
+        public string uiIconPath;
         public int pointCost = 1;
 
         // Nested effect lists
         public List<HediffEffectProperties> hediffEffects;
         public List<AbilityEffectProperties> abilityEffects;
         public List<OrganEffectProperties> organEffects;
+
+        public virtual string DescriptionString { get; } = "";
 
         public List<UpgradeEffect> CreateEffects()
         {
@@ -48,7 +50,6 @@ namespace Protean
         public bool isAddition;
     }
 
-    // Previous property classes remain the same
     public class HediffEffectProperties
     {
         public HediffDef hediffDef;

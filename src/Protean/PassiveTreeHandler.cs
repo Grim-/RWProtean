@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace Protean
@@ -10,7 +11,7 @@ namespace Protean
         private int currentLevel;
         private int unspentLevels;
         private int availablePoints;
-        private bool HasChosenPath => selectedPaths.Any();
+        private bool HasChosenPath => HasSelectedAPath();
 
         public PassiveTreeHandler()
         {
@@ -21,73 +22,59 @@ namespace Protean
         {
             this.currentLevel = 0;
             this.unspentLevels = 0;
-            this.availablePoints = 0;
-
-            if (Scribe.mode != LoadSaveMode.LoadingVars)
-            {
-                TryUnlockNextUpgrade(this.treeDef.nodes[0], true);
-            }
+            this.availablePoints = 1;
         }
 
-        protected override UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node)
+        protected override UnlockResult ValidateTreeSpecificRules(UpgradeTreeNodeDef node)
         {
             int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count)
-                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Already unlocked all upgrades in this node");
+            if (currentProgress >= node.UpgradeCount)
+                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, $"{treeDef.defName} Already unlocked all upgrades in this node");
 
-            if (availablePoints < node.upgrades[currentProgress].pointCost)
+            if (node.type == NodeType.Start)
             {
-                Log.Message($"Insufficient points for node {node.defName}. Available: {availablePoints}, Required: {node.upgrades[currentProgress].pointCost}");
+                return UnlockResult.Succeeded();
+            }
+
+            if (availablePoints < node.GetUpgradeCost(currentProgress))
+            {
+                Log.Message($"{treeDef.defName} Insufficient points for node {node.defName}. Available: {availablePoints}, Required: {node.GetUpgradeCost(currentProgress)}");
                 return UnlockResult.Failed(UpgradeUnlockError.InsufficientPoints,
-                    string.Format("Requires {0} points", node.upgrades[currentProgress].pointCost));
+                    string.Format("{0} Requires {1} points", treeDef.defName, node.GetUpgradeCost(currentProgress)));
             }
             return UnlockResult.Succeeded();
         }
-        private void ForceUnlockNode(UpgradeTreeNodeDef node)
+        public override UnlockResult TryUnlockNode(UpgradeTreeNodeDef node)
         {
-            if (node == null || IsNodeFullyUnlocked(node)) return;
-
-            // Force unlock all upgrades in the node
-            while (GetNodeProgress(node) < node.upgrades.Count)
-            {
-                TryUnlockNextUpgrade(node);
-            }
-        }
-        public UnlockResult TryUnlockNode(UpgradeTreeNodeDef node)
-        {
-            UnlockResult result = CanUnlockNode(node);
+            UnlockResult result = ValidateUnlock(node);
             if (!result.Success)
             {
                 return result;
             }
 
             int currentProgress = GetNodeProgress(node);
-            if (currentProgress >= node.upgrades.Count)
+            if (currentProgress >= node.UpgradeCount)
             {
-                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, "Node is already fully unlocked");
+                return UnlockResult.Failed(UpgradeUnlockError.AlreadyUnlocked, $"{treeDef.defName} Node is already fully unlocked");
             }
 
-            int cost = node.upgrades[currentProgress].pointCost;
+            int cost = node.GetUpgradeCost(currentProgress);
             if (availablePoints < cost)
             {
-                return UnlockResult.Failed(UpgradeUnlockError.InsufficientPoints, $"Requires {cost} points");
+                return UnlockResult.Failed(UpgradeUnlockError.InsufficientPoints, $"{treeDef.defName} Requires {cost} points");
             }
 
-            availablePoints -= cost;
             UnlockResult unlockResult = TryUnlockNextUpgrade(node);
-
-            if (!unlockResult.Success)
+            if (unlockResult.Success)
             {
-                // Refund points if unlock failed
-                availablePoints += cost;
+                availablePoints -= cost;
             }
-
             return unlockResult;
         }
 
         public override void OnPathSelected(UpgradePathDef path)
         {
-            Log.Message($"Path selected: {path.defName}, Unspent levels: {unspentLevels}");
+            Log.Message($"{treeDef.defName} Path selected: {path.defName}, Unspent levels: {unspentLevels}");
             if (unspentLevels > 0)
             {
                 availablePoints += unspentLevels;
@@ -96,21 +83,18 @@ namespace Protean
             }
         }
 
-        public void OnLevelUp(int newLevel)
+        public override void OnLevelUp(int newLevel)
         {
-            Log.Message($"Level up from {currentLevel} to {newLevel}. HasChosenPath: {HasChosenPath}");
-            int levelsGained = newLevel - currentLevel;
-            this.currentLevel = newLevel;
-
+            base.OnLevelUp(newLevel);
             if (!HasChosenPath)
             {
-                unspentLevels += levelsGained;
-                Log.Message($"Storing {unspentLevels} unspent levels");
+                unspentLevels++;
+                Log.Message($"{treeDef.defName} Storing {unspentLevels} unspent levels");
             }
             else
             {
-                availablePoints += levelsGained;
-                Log.Message($"Adding {levelsGained} points, now have {availablePoints}");
+                availablePoints++;
+                Log.Message($"{treeDef.defName} Adding {1} points, now have {availablePoints}");
                 AutoUnlockAvailableNodes();
             }
         }
@@ -119,11 +103,11 @@ namespace Protean
         {
             if (!HasChosenPath)
             {
-                Log.Message("No path chosen, skipping auto-unlock");
+                Log.Message($"{treeDef.defName} No path chosen, skipping auto-unlock");
                 return;
             }
 
-            Log.Message("Attempting to auto-unlock available nodes");
+            Log.Message($"{treeDef.defName} Attempting to auto-unlock available nodes");
             bool unlocked;
             do
             {
@@ -135,14 +119,13 @@ namespace Protean
 
                 foreach (var node in availableNodes)
                 {
-                    UnlockResult result = CanUnlockNode(node);
+                    UnlockResult result = ValidateUnlock(node);
                     if (result.Success)
                     {
-                        Log.Message($"Auto-unlocking node: {node.defName}");
+                        Log.Message($"{treeDef.defName} Auto-unlocking node: {node.defName}");
                         if (TryUnlockNode(node).Success)
                         {
                             unlocked = true;
-                            break; // Only unlock one node per iteration
                         }
                     }
                 }
@@ -157,45 +140,57 @@ namespace Protean
             Scribe_Values.Look(ref unspentLevels, "unspentLevels", 0);
             Scribe_Values.Look(ref availablePoints, "availablePoints", 0);
 
-            if (Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-                if (unlockedNodes.Count == 0)
-                {
-                    UnlockStartNode();
-                }
+            //if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            //{
+            //    if (!IsNodeFullyUnlocked(treeDef.nodes[0]))
+            //    {
+            //        TryUnlockNextUpgrade(treeDef.nodes[0], true);
+            //    }
 
-                if (selectedPaths != null && selectedPaths.Any())
-                {
-                    foreach (var path in selectedPaths.ToList())
-                    {
-                        OnPathSelected(path);
-                    }
-                }
+            //    if (selectedPaths != null && selectedPaths.Any())
+            //    {
+            //        foreach (var path in selectedPaths.ToList())
+            //        {
+            //            OnPathSelected(path);
+            //        }
+            //    }
 
-                if (HasSelectedAPath())
-                {
-                    int spentPoints = 0;
-                    foreach (var node in treeDef.GetAllNodes())
-                    {
-                        if (node.type != NodeType.Start)
-                        {
-                            int progress = GetNodeProgress(node);
-                            for (int i = 0; i < progress && i < node.upgrades.Count; i++)
-                            {
-                                spentPoints += node.upgrades[i].pointCost;
-                            }
-                        }
-                    }
-                    availablePoints = currentLevel - spentPoints;
+            //    if (HasSelectedAPath())
+            //    {
+            //        int spentPoints = 0;
+            //        foreach (var node in treeDef.GetAllNodes())
+            //        {
+            //            if (node.type != NodeType.Start)
+            //            {
+            //                int progress = GetNodeProgress(node);
+            //                for (int i = 0; i < progress && i < node.upgrades.Count; i++)
+            //                {
+            //                    spentPoints += node.upgrades[i].pointCost;
+            //                }
+            //            }
+            //        }
+            //        availablePoints = currentLevel - spentPoints;
 
-                    AutoUnlockAvailableNodes();
-                }
-                else if (currentLevel > 0)
-                {
-                    unspentLevels = currentLevel;
-                    availablePoints = 0;
-                }
-            }
+            //        AutoUnlockAvailableNodes();
+            //    }
+            //    else if (currentLevel > 0)
+            //    {
+            //        unspentLevels = currentLevel;
+            //        availablePoints = 0;
+            //    }
+            //}
+        }
+        public override void DrawToolBar(Rect rect)
+        {
+            base.DrawToolBar(rect);
+            rect = rect.ContractedBy(2);
+            float currentX = rect.x;
+            string label = $"Talent Points Available {availablePoints} unspent points {unspentLevels}";
+            Vector2 labelSize = Text.CalcSize(label);
+            currentX += labelSize.x;
+
+            Rect labelRect = new Rect(currentX, rect.y, labelSize.x, labelSize.y);
+            Widgets.Label(labelRect, label);
         }
     }
 }

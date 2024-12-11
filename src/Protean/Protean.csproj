@@ -104,7 +104,7 @@
     <Compile Include="Gene_Parasite.cs" />
     <Compile Include="Upgrades\HediffEffect.cs" />
     <Compile Include="Upgrades\OrganEffect.cs" />
-    <Compile Include="Tree\UpgradeEffectDef.cs" />
+    <Compile Include="Upgrades\UpgradeEffectDef.cs" />
     <Compile Include="Tree\UpgradeTreeNodeDef.cs" />
     <Compile Include="Tree\UpgradeTreeDef.cs" />
     <Compile Include="ParasiteTreeUI.cs" />

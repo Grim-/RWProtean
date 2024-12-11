@@ -4,60 +4,15 @@ import Button from './components/Button';
 import Node from './components/Node';
 import PropertiesPanel from './components/PropertiesPanel'
 import { saveDef, loadDefs } from './storage';
+import { serializeDefToXml, serializeProperty } from './utils/xmlSerializer';
 
-const serializeDefToXml = (def) => {
-  let xml = `  <${def.type}>\n`;
-  xml += `    <defName>${def.defName}</defName>\n`;
 
-  Object.entries(def).forEach(([key, value]) => {
-    if (key !== 'type' && key !== 'defName') {
-      xml += serializeProperty(key, value, 2);
-    }
-  });
 
-  xml += `  </${def.type}>\n\n`;
-  return xml;
-};
 
-const serializeProperty = (key, value, indent) => {
-  const spaces = ' '.repeat(indent * 2);
-
-  if (Array.isArray(value)) {
-    if (value.length === 0) return '';
-    let xml = `${spaces}<${key}>\n`;
-    value.forEach(item => {
-      if (typeof item === 'object') {
-        xml += `${spaces}  <li>\n`;
-        Object.entries(item).forEach(([k, v]) => {
-          xml += serializeProperty(k, v, indent + 2);
-        });
-        xml += `${spaces}  </li>\n`;
-      } else {
-        xml += `${spaces}  <li>${item}</li>\n`;
-      }
-    });
-    xml += `${spaces}</${key}>\n`;
-    return xml;
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    let xml = `${spaces}<${key}>\n`;
-    Object.entries(value).forEach(([k, v]) => {
-      xml += serializeProperty(k, v, indent + 1);
-    });
-    xml += `${spaces}</${key}>\n`;
-    return xml;
-  }
-
-  if (value !== undefined && value !== '') {
-    return `${spaces}<${key}>${value}</${key}>\n`;
-  }
-
-  return '';
-};
 const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
   // Reference data state
   const [referenceDefs, setReferenceDefs] = useState(() => {
+
     const savedDefs = localStorage.getItem('nodeEditorReferenceDefs');
     return savedDefs ? JSON.parse(savedDefs) : [];
   });
@@ -79,7 +34,7 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
   }, [referenceDefs]);
 
   // Session management functions
-  const saveSessionToFile = () => {
+  const saveSessionToFile = (setNodes, setPaths) => {
     const sessionData = {
       nodes,
       paths,
@@ -111,7 +66,7 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
   };
 
   // Clear only session data
-  const clearSession = () => {
+  const clearSession = (setNodes, setPaths) => {
     if (window.confirm('Clear current session? Reference data will be preserved.')) {
       setNodes([{
         id: 'start',
@@ -398,12 +353,12 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
           onChange={loadSessionFromFile}
           className="hidden"
         />
-        <Button onClick={saveSessionToFile} className="bg-blue-500 text-white">
+        <Button onClick={(e) => saveSessionToFile(nodes, paths)} className="bg-blue-500 text-white">
           Save Session
         </Button>
-        <Button onClick={() => setShowImport(true)} className="bg-green-500 text-white">Import XML</Button>
+        <Button onClick={(e) => setShowImport(true)} className="bg-green-500 text-white">Import XML</Button>
         <Button onClick={exportToXml} className="bg-purple-500 text-white">Export XML</Button>
-        <Button onClick={clearSession} className="bg-red-500 text-white">Clear Session</Button>
+        <Button onClick={(e) => clearSession(setNodes, setPaths)} className="bg-red-500 text-white">Clear Session</Button>
       </div>
 
       {/* Properties Panel */}

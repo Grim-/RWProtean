@@ -13,10 +13,46 @@ namespace Protean
         public UpgradePathDef path;
         public List<BranchPathData> branchPaths;
 
+
+        public bool hide = false;
+        public List<UpgradeDef> prerequisitesToShow;
+
+        public bool MeetsVisibilityRequirements(BaseTreeHandler treeHandler)
+        {
+            if (prerequisitesToShow == null || prerequisitesToShow.Count == 0)
+            {
+                return true;
+            }
+
+            bool result = true;
+            var neededReqs = prerequisitesToShow.ToList();
+
+            foreach (var item in neededReqs)
+            {
+                if (!treeHandler.HasUnlockUpgrade(item))
+                {
+                    return false;
+                }
+            }
+
+            return result;
+        }
+
+
         public IEnumerable<UpgradeTreeNodeDef> GetPredecessors(UpgradeTreeDef treeDef)
         {
             return treeDef.GetAllNodes().Where(n =>
                 n.connections != null && n.connections.Contains(this));
+        }
+
+        public int GetUpgradeCost(int upgradeIndex)
+        {
+            if (HasUpgrade(upgradeIndex))
+            {
+                return GetUpgrade(upgradeIndex).pointCost;
+            }
+
+            return 0;
         }
 
         public bool HasUpgrade(int upgradeIndex)
@@ -35,7 +71,7 @@ namespace Protean
             }
             return upgrades[upgradeIndex];
         }
-
+        public int UpgradeCount => upgrades != null ? upgrades.Count : 0;
         public int ConnectionCount => connections != null ? connections.Count : 0;
         public bool BelongsToUpgradePath => path != null;
         public bool IsBranchNode => type == NodeType.Branch;

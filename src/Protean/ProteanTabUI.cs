@@ -9,10 +9,12 @@ namespace Protean
         private Gene_Parasite Parasite => (Gene_Parasite)SelPawn.genes.GetGene(ProteanDefOf.Protean_BasicGene);
         public override bool IsVisible => SelPawn?.genes?.GetGene(ProteanDefOf.Protean_BasicGene) != null;
         const float padding = 5f;
-        const float buttonWidth = 100f;
+        const float buttonWidth = 90f;
         const float levelWidth = 80f;
         const float progressWidth = 100f;
         Vector2 tabSize = new Vector2(500, 400);
+
+        private float toolbarHeight => 40f;
 
         public ProteanTabUI()
         {
@@ -23,19 +25,13 @@ namespace Protean
         protected override void FillTab()
         {
             var rect = new Rect(0, 0, tabSize.x, tabSize.y);
-            var toolbarHeight = 35f;
             var toolbarRect = rect.TopPartPixels(toolbarHeight);
-
-            // Draw toolbar background
             GUI.DrawTexture(toolbarRect, SolidColorMaterials.NewSolidColorTexture(Color.grey));
-
             DrawToolbar(toolbarRect);
         }
 
         private void DrawToolbar(Rect rect)
         {
-
-
             float curX = padding;
 
             // Bond Level with bg
@@ -48,12 +44,12 @@ namespace Protean
             // Parasite Level with bg  
             var parasiteLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
             Widgets.DrawHighlight(parasiteLabelRect);
-            Widgets.Label(parasiteLabelRect, $"Parasite Level: {Parasite.ParasiteLevel}");
+            Widgets.Label(parasiteLabelRect, $"Parasite Level: {Parasite.CurrentLevel}");
             curX += levelWidth + padding;
 
-            var evoPointsLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
-            Widgets.DrawHighlight(evoPointsLabelRect);
-            Widgets.Label(evoPointsLabelRect, $"Evolution Points: {Parasite.EvolutionPoints}");
+            //var evoPointsLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
+            //Widgets.DrawHighlight(evoPointsLabelRect);
+            //Widgets.Label(evoPointsLabelRect, $"Evolution Points: {Parasite.TalentPointsAvailable}");
             curX += levelWidth + padding;
 
             Text.Anchor = TextAnchor.UpperLeft;

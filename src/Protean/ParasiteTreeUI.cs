@@ -19,6 +19,8 @@ namespace Protean
         private readonly List<UIAnimationState> activeAnimations = new List<UIAnimationState>();
         private readonly UpgradeTreeSkinDef skin;
 
+        protected override float Margin => skin != null ? skin.windowMargin : 0;
+
         public override Vector2 InitialSize => new Vector2(450f, 800f);
 
         public ParasiteTreeUI(Gene_Parasite parasite, UpgradeTreeDef tree, BaseTreeHandler handler, TreeDisplayStrategyDef displayStrategyDef)
@@ -33,7 +35,7 @@ namespace Protean
             treeDef = tree;
             treeHandler = handler;
             allNodes = treeDef.GetAllNodes();
-            skin = tree.GetSkin();
+            skin = tree.Skin;
 
             displayStrategy = (ITreeDisplayStrategy)Activator.CreateInstance(displayStrategyDef.strategyClass);
 
@@ -45,22 +47,20 @@ namespace Protean
 
         public override void DoWindowContents(Rect inRect)
         {
-            // Draw background to fill the entire content area first
-            Widgets.DrawTextureFitted(inRect, skin.BackgroundTexture, 1f);
-
-            // Then draw toolbar
+            DrawBackground(inRect);
+            // Toolbar and rest of contents
             Rect toolbarRect = new Rect(0f, 0f, inRect.width, skin.toolbarHeight);
             DrawToolbar(toolbarRect);
 
-            // Rest of the window contents
             nodePositions = displayStrategy.PositionNodes(allNodes, inRect, skin.nodeSize, skin.nodeSpacing);
             DrawConnections();
             DrawNodes();
-            activeAnimations.RemoveAll(a => a.Finished);
-            foreach (var anim in activeAnimations)
-            {
-                anim.Animate();
-            }
+        }
+
+        private void DrawBackground(Rect inRect)
+        {
+            GUI.color = Color.white;
+            GUI.DrawTexture(inRect, skin.BackgroundTexture, ScaleMode.StretchToFill);
         }
 
         private void DrawNodes()
@@ -73,35 +73,43 @@ namespace Protean
 
         private void DrawNode(UpgradeTreeNodeDef node, Rect nodeRect)
         {
-            UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
+            UnlockResult canUnlockResult = treeHandler.ValidateUnlock(node);
             int currentProgress = treeHandler.GetNodeProgress(node);
             bool isFullyUnlocked = treeHandler.IsNodeFullyUnlocked(node);
-
-            GUI.color = treeHandler.GetNodeColor(node, currentProgress);
-            GUI.DrawTexture(nodeRect, skin.NodeTexture);
-            GUI.color = Color.white;
-
-            if (currentProgress > 0 && !isFullyUnlocked)
+            if (!node.hide || node.hide && node.MeetsVisibilityRequirements(treeHandler))
             {
-                float progressPercentage = (float)currentProgress / node.upgrades.Count;
-                Rect progressRect = nodeRect;
-                progressRect.height *= progressPercentage;
-                progressRect.y = nodeRect.yMax - progressRect.height;
-
-                GUI.color = Color.red;
-                GUI.DrawTexture(progressRect, skin.NodeTexture);
+                GUI.color = treeHandler.GetNodeColor(node, currentProgress);
+                GUI.DrawTexture(nodeRect, skin.NodeTexture);
                 GUI.color = Color.white;
+
+                if (currentProgress > 0 && !isFullyUnlocked)
+                {
+                    float progressPercentage = (float)currentProgress / node.upgrades.Count;
+                    Rect progressRect = nodeRect;
+                    progressRect.height *= progressPercentage;
+                    progressRect.y = nodeRect.yMax - progressRect.height;
+
+                    GUI.color = Color.red;
+                    GUI.DrawTexture(progressRect, skin.NodeTexture);
+                    GUI.color = Color.white;
+                }
+
+                DrawNodeIconBG(node, nodeRect);
+                DrawNodeIcon(node, nodeRect);
+                DrawNodeBadge(node, nodeRect);
+
+                HandleNodeClick(nodeRect, node, canUnlockResult);
+
+                if (Mouse.IsOver(nodeRect))
+                {
+                    DrawDescription(nodeRect, node, currentProgress);
+                }
             }
-
-            DrawNodeIconBG(node, nodeRect);
-            DrawNodeIcon(node, nodeRect);
-            DrawNodeBadge(node, nodeRect);
-
-            HandleNodeClick(nodeRect, node, canUnlockResult);
-
-            if (Mouse.IsOver(nodeRect))
+            else
             {
-                DrawDescription(nodeRect, node, currentProgress);
+                GUI.color = new Color(0.1f, 0.1f, 0.1f, 0.1f);
+                GUI.DrawTexture(nodeRect, skin.NodeTexture);
+                GUI.color = Color.white;
             }
         }
 
@@ -119,127 +127,53 @@ namespace Protean
 
             Widgets.Label(badgeRect, label);
         }
-
         private void HandleNodeClick(Rect nodeRect, UpgradeTreeNodeDef node, UnlockResult canUnlockResult)
         {
-            if (Widgets.ButtonInvisible(nodeRect))
-            {
-                if (canUnlockResult.Success)
-                {
-                    // Try to unlock first
-                    UnlockResult unlockResult = null;
-                    if (treeHandler is ActiveTreeHandler activeHandler)
-                    {
-                        unlockResult = activeHandler.TryUnlockNode(node);
-                        if (!unlockResult.Success)
-                        {
-                            Messages.Message(unlockResult.Message, MessageTypeDefOf.RejectInput);
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if (!treeHandler.IsNodeFullyUnlocked(node))
-                        {
-                            int progress = treeHandler.GetNodeProgress(node);
+            if (!Widgets.ButtonInvisible(nodeRect))
+                return;
 
-                            if (node.HasUpgrade(progress + 1))
-                            {
-                                treeHandler.UnlockUpgrade(node.GetUpgrade(progress + 1));
-                            }
-                        }
-                       
-                       
-                    }
-
-                    // If unlock succeeded and node has a path that can be selected, do it immediately
-                    if (node.BelongsToUpgradePath &&
-                        node.path != null &&
-                        !treeHandler.IsPathSelected(node.path) &&
-                        treeHandler.CanSelectPath(node.path))
-                    {
-                        UnlockResult pathResult = treeHandler.SelectPath(node.path);
-                        if (pathResult.Success)
-                        {
-                            var predecessors = node.GetPredecessors(treeDef)
-                                                 .Where(p => treeHandler.IsNodeFullyUnlocked(p));
-                            foreach (var predecessor in predecessors)
-                            {
-                                activeAnimations.Add(new ConnectionAnimation
-                                {
-                                    startTime = Time.time,
-                                    duration = 0.5f,
-                                    startPos = nodePositions[predecessor].center,
-                                    endPos = nodePositions[node].center,
-                                    color = skin.unlockedNodeColor
-                                });
-                            }
-                            Log.Message($"Selected {node.path.defName} upgrade path.");
-                            Messages.Message($"Selected {node.path.defName} upgrade path.", MessageTypeDefOf.NeutralEvent);
-                        }
-                    }
-                }
-                // If can't unlock but has an unselected path that could be selected
-                else if (node.BelongsToUpgradePath &&
-                        node.path != null &&
-                        !treeHandler.IsPathSelected(node.path))
-                {
-                    if (treeHandler.CanSelectPath(node.path))
-                    {
-                        UnlockResult result = treeHandler.SelectPath(node.path);
-                        if (!result.Success)
-                        {
-                            Messages.Message(result.Message, MessageTypeDefOf.RejectInput);
-                        }
-                    }
-                    else
-                    {
-                        Messages.Message("Cannot select this path - conflicts with existing selection", MessageTypeDefOf.RejectInput);
-                    }
-                }
-                else
-                {
-                    Messages.Message(canUnlockResult.Message, MessageTypeDefOf.RejectInput);
-                }
-            }
-        }
-
-        private void OnUpgradeUnlocked(UpgradeTreeNodeDef node)
-        {
-            if (treeHandler.IsNodeFullyUnlocked(node))
-            {
-                HandleFullyUnlockedNode(node);
-
-                var predecessors = node.GetPredecessors(treeDef)
-                    .Where(p => treeHandler.IsNodeFullyUnlocked(p));
-
-                foreach (var predecessor in predecessors)
-                {
-                    activeAnimations.Add(new ConnectionAnimation
-                    {
-                        startTime = Time.time,
-                        duration = 0.5f,
-                        startPos = nodePositions[predecessor].center,
-                        endPos = nodePositions[node].center,
-                        color = skin.unlockedNodeColor
-                    });
-                }
-            }
-        }
-
-        private void HandleFullyUnlockedNode(UpgradeTreeNodeDef node)
-        {
-            if (node.BelongsToUpgradePath &&
-                node.path != null &&
-                !treeHandler.IsPathSelected(node.path) &&
-                treeHandler.CanSelectPath(node.path))
+            if (node.BelongsToUpgradePath && node.path != null && !treeHandler.IsPathSelected(node.path))
             {
                 HandlePathSelection(node);
+                if (treeHandler.IsPathSelected(node.path))
+                {
+                    HandleSuccessfulUnlock(node);
+                }
             }
+            else if (canUnlockResult.Success)
+            {
+                HandleSuccessfulUnlock(node);
+            }
+            else
+            {
+                Messages.Message(canUnlockResult.Message, MessageTypeDefOf.RejectInput);
+            }
+        }
+
+        private void HandleSuccessfulUnlock(UpgradeTreeNodeDef node)
+        {
+            if (treeHandler != null)
+            {
+                var unlockResult = treeHandler.TryUnlockNode(node);
+                if (!unlockResult.Success)
+                {
+                    Messages.Message(unlockResult.Message, MessageTypeDefOf.RejectInput);
+                    return;
+                }
+            }
+            //else if (!treeHandler.IsNodeFullyUnlocked(node))
+            //{
+            //    int progress = treeHandler.GetNodeProgress(node);
+            //    if (node.HasUpgrade(progress + 1))
+            //    {
+            //        treeHandler.UnlockUpgrade(node.GetUpgrade(progress + 1));
+            //    }
+            //}
         }
         private void HandlePathSelection(UpgradeTreeNodeDef node)
         {
-            if (treeHandler.CanSelectPath(node.path))
+            if (node.BelongsToUpgradePath && node.path != null &&
+                !treeHandler.IsPathSelected(node.path) && treeHandler.CanSelectPath(node.path))
             {
                 UnlockResult result = treeHandler.SelectPath(node.path);
                 if (result.Success)
@@ -274,9 +208,9 @@ namespace Protean
         private void DrawNodeIcon(UpgradeTreeNodeDef node, Rect nodeRect)
         {
             Rect iconRect = nodeRect.ContractedBy(8f);
-            if (!node.upgrades.NullOrEmpty() && !string.IsNullOrEmpty(node.upgrades[0].uiIcon))
+            if (!node.upgrades.NullOrEmpty() && !string.IsNullOrEmpty(node.upgrades[0].uiIconPath))
             {
-                var icon = ContentFinder<Texture2D>.Get(node.upgrades[0].uiIcon);
+                var icon = ContentFinder<Texture2D>.Get(node.upgrades[0].uiIconPath);
                 if (icon != null)
                 {
                     Widgets.DrawTextureFitted(iconRect, icon, 1f);
@@ -296,14 +230,14 @@ namespace Protean
         private void DrawDescription(Rect nodeRect, UpgradeTreeNodeDef node, int currentProgress)
         {
             bool isFullyUnlocked = treeHandler.IsNodeFullyUnlocked(node);
-            UnlockResult canUnlockResult = treeHandler.CanUnlockNode(node);
+            UnlockResult canUnlockResult = treeHandler.ValidateUnlock(node);
 
             string tooltip = "";
 
             if (currentProgress < node.upgrades.Count)
             {
                 var nextUpgrade = node.upgrades[currentProgress];
-                tooltip = nextUpgrade?.description ?? "Unknown upgrade";
+                tooltip = nextUpgrade?.DescriptionString ?? "Unknown upgrade";
                 tooltip += $"\n\nNext Upgrade: {nextUpgrade?.label ?? "Unknown"}";
             }
             else
@@ -322,7 +256,7 @@ namespace Protean
                 }
             }
 
-            tooltip += "\n=== Debug Info ===";
+            tooltip += "\n[== Debug Info ==]";
             tooltip += $"\nNode: {node.defName}";
             tooltip += $"\nType: {node.type}";
             tooltip += $"\nFully Unlocked: {isFullyUnlocked}";
@@ -350,9 +284,21 @@ namespace Protean
                 {
                     foreach (var connection in node.connections)
                     {
+                        if (node.hide && !node.MeetsVisibilityRequirements(treeHandler) || connection.hide && !connection.MeetsVisibilityRequirements(treeHandler))
+                        {
+                            continue;
+                        }
+
                         if (nodePositions.ContainsKey(node) && nodePositions.ContainsKey(connection))
                         {
-                            DrawConnection(node, connection);
+                            if (skin.HasConnectionTexure)
+                            {
+                                DrawTexturedConnection(node, connection);
+                            }
+                            else
+                            {
+                                DrawConnection(node, connection);
+                            }                                                
                         }
                     }
                 }
@@ -372,20 +318,59 @@ namespace Protean
                 DrawConnectionArrow(start, end, lineColor);
             }
         }
+        private void DrawTexturedConnection(UpgradeTreeNodeDef from, UpgradeTreeNodeDef to)
+        {
+            Vector2 start = nodePositions[from].center;
+            Vector2 end = nodePositions[to].center;
+            Color lineColor = GetPathStatusColor(from, to);
 
+            float distance = Vector2.Distance(start, end);
+            Vector2 direction = (end - start).normalized;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            int numberOfLinks = Mathf.Max(1, Mathf.FloorToInt(distance / skin.connectionLinkSize));
+            float spacing = distance / numberOfLinks;
+
+            Matrix4x4 matrixBackup = GUI.matrix;
+ 
+            for (int i = 0; i < numberOfLinks; i++)
+            {
+                float progress = i / (float)(numberOfLinks - 1);
+                Vector2 position = Vector2.Lerp(start, end, progress);
+
+                Rect linkRect = new Rect(
+                    position.x - skin.connectionLinkSize / 2,
+                    position.y - skin.connectionLinkSize / 2,
+                    skin.connectionLinkSize,
+                    skin.connectionLinkSize
+                );
+
+                GUI.matrix = matrixBackup;
+                GUIUtility.RotateAroundPivot(angle, position);
+                GUI.DrawTexture(linkRect, skin.ConnectionTexture);
+            }
+
+            GUI.color = Color.white;
+            GUI.matrix = matrixBackup;
+
+            if (skin.showConnectionArrows && distance > skin.nodeSize)
+            {
+                DrawConnectionArrow(start, end, lineColor);
+            }
+        }
 
         private Color GetPathStatusColor(UpgradeTreeNodeDef from, UpgradeTreeNodeDef to)
         {
             Color lineColor;
             switch (treeHandler.GetPathStatusBetweenNodes(from, to))
             {
-                case BaseTreeHandler.PathStatus.Unlocked:
+                case PathStatus.Unlocked:
                     lineColor = skin.unlockedConnectionColor;
                     break;
-                case BaseTreeHandler.PathStatus.Active:
+                case PathStatus.Active:
                     lineColor = skin.activeConnectionColor;
                     break;
-                case BaseTreeHandler.PathStatus.Locked:
+                case PathStatus.Locked:
                     lineColor = skin.inactiveConnectionColor;
                     break;
                 default:
@@ -412,7 +397,7 @@ namespace Protean
         private void DrawToolbar(Rect rect)
         {
             Widgets.DrawMenuSection(rect);
-            displayStrategy.DrawToolBar(rect);
+            treeHandler?.DrawToolBar(rect);
         }
     }
 }

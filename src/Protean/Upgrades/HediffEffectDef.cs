@@ -6,6 +6,7 @@ namespace Protean
     {
         public HediffDef hediffDef;
 
+        public override string Description => $"You gain {hediffDef.label}";
         public override UpgradeEffect CreateEffect()
         {
             return new HediffEffect

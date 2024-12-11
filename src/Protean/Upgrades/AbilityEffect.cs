@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace Protean
@@ -9,15 +10,22 @@ namespace Protean
         public List<AbilityDef> abilities;
         private List<Ability> grantedAbilities = new List<Ability>();
 
-        public override void Apply(Pawn pawn)
+        protected override bool IsEffectPresent(Pawn pawn)
+        {
+            if (pawn.abilities == null) return false;
+
+            grantedAbilities.RemoveAll(ability => ability == null || !pawn.abilities.abilities.Contains(ability));
+
+            return abilities.All(abilityDef =>
+                grantedAbilities.Any(a => a.def == abilityDef) ||
+                pawn.abilities.GetAbility(abilityDef) != null);
+        }
+
+        protected override void Apply(Pawn pawn)
         {
             if (pawn.abilities == null)
                 pawn.abilities = new Pawn_AbilityTracker(pawn);
 
-            // Remove any tracked abilities that no longer exist
-            grantedAbilities.RemoveAll(ability => ability == null || !pawn.abilities.abilities.Contains(ability));
-
-            // Add any abilities from our list that we haven't already granted
             foreach (var abilityDef in abilities)
             {
                 if (!grantedAbilities.Any(a => a.def == abilityDef))
@@ -28,7 +36,7 @@ namespace Protean
             }
         }
 
-        public override void Remove(Pawn pawn)
+        protected override void Remove(Pawn pawn)
         {
             if (pawn.abilities != null)
             {
@@ -43,6 +51,7 @@ namespace Protean
 
         public override void ExposeData()
         {
+            base.ExposeData();
             Scribe_Collections.Look(ref abilities, "abilities", LookMode.Def);
             Scribe_Collections.Look(ref grantedAbilities, "grantedAbilities", LookMode.Reference);
         }

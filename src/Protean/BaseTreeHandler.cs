@@ -5,7 +5,7 @@ using Verse;
 
 namespace Protean
 {
-    public abstract partial class BaseTreeHandler : IExposable
+    public abstract class BaseTreeHandler : IExposable
     {
         protected Pawn pawn;
         protected Gene_Parasite gene;
@@ -15,6 +15,12 @@ namespace Protean
         protected Dictionary<UpgradeDef, List<UpgradeEffect>> activeEffects;
         protected HashSet<UpgradePathDef> selectedPaths;
         protected Dictionary<UpgradeTreeNodeDef, int> nodeProgress;
+
+
+        public bool HasUnlockUpgrade(UpgradeDef upgradeDef)
+        {
+            return unlockedUpgrades.Contains(upgradeDef);
+        }
 
         protected BaseTreeHandler()
         {
@@ -30,22 +36,56 @@ namespace Protean
             this.activeEffects = new Dictionary<UpgradeDef, List<UpgradeEffect>>();
             this.selectedPaths = new HashSet<UpgradePathDef>();
             this.nodeProgress = new Dictionary<UpgradeTreeNodeDef, int>();
-
         }
 
-        public bool IsPathSelected(UpgradePathDef path) => selectedPaths.Contains(path);
+        public virtual void OnLevelUp(int newLevel)
+        {
+       
+        }
+        protected virtual void ReapplyUnlockedUpgrades()
+        {
+            if (activeEffects == null || unlockedUpgrades == null) return;
+
+            var upgradesList = unlockedUpgrades.ToList();
+            activeEffects.Clear();
+
+            foreach (var upgrade in upgradesList)
+            {
+                if (upgrade == null) continue;
+
+                activeEffects[upgrade] = new List<UpgradeEffect>();
+                var effects = upgrade.CreateEffects();
+                foreach (var effect in effects)
+                {
+                    effect.TryApply(pawn);
+                    activeEffects[upgrade].Add(effect);
+                }
+            }
+        }
+
+        #region Nodes
+        public virtual UnlockResult TryUnlockNode(UpgradeTreeNodeDef node)
+        {
+            UnlockResult result = ValidateUnlock(node);
+            return result;
+        }
 
         public bool IsNodeFullyUnlocked(UpgradeTreeNodeDef node)
         {
-            if (node?.upgrades == null) return false;
+            if (node?.upgrades == null)
+            {
+                Log.ErrorOnce($"Node Def[{node.defName}] has no upgrades defined!", 2105);
+                return false;
+            }
+
             return nodeProgress.TryGetValue(node, out int progress) &&
                    progress >= node.upgrades.Count;
         }
 
-        public UnlockResult CanUnlockNode(UpgradeTreeNodeDef node)
-        {
-            return ValidateUnlock(node);
-        }
+        //public UnlockResult CanUnlockNode(UpgradeTreeNodeDef node)
+        //{
+        //    return ValidateUnlock(node);
+        //}
 
         public int GetNodeProgress(UpgradeTreeNodeDef node)
         {
@@ -58,35 +98,6 @@ namespace Protean
             int currentProgress = GetNodeProgress(node);
             return currentProgress < node.upgrades.Count;
         }
-
-        public PathStatus GetPathStatusBetweenNodes(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
-        {
-            if (IsPathUnlocked(StartNode, EndNode))
-            {
-                return PathStatus.Unlocked;
-            }
-            else if (IsPathActive(StartNode, EndNode))
-            {
-                return PathStatus.Active;
-            }
-            else
-            {
-                return PathStatus.Locked;
-            }
-        }
-        public bool IsPathActive(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
-        {
-            return IsNodeFullyUnlocked(StartNode) ||
-                  IsNodeFullyUnlocked(EndNode);
-        }
-
-        public bool IsPathUnlocked(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
-        {
-            return IsNodeFullyUnlocked(StartNode) &&
-                  IsNodeFullyUnlocked(EndNode);
-        }
-
-
         public Color GetNodeColor(UpgradeTreeNodeDef node, int currentProgress)
         {
             bool isFullyUnlocked = IsNodeFullyUnlocked(node);
@@ -94,36 +105,39 @@ namespace Protean
             if (node.BelongsToUpgradePath)
             {
                 if (isFullyUnlocked)
-                    return this.treeDef.GetSkin().unlockedNodeColor;
+                    return this.treeDef.Skin.unlockedNodeColor;
 
                 if (IsPathSelected(node.path))
-                    return this.treeDef.GetSkin().pathSelectedColor;
+                    return this.treeDef.Skin.pathSelectedColor;
 
-                return CanSelectPath(node.path) ? this.treeDef.GetSkin().pathAvailableColor : this.treeDef.GetSkin().pathExcludedColor;
+                return CanSelectPath(node.path) ? this.treeDef.Skin.pathAvailableColor : this.treeDef.Skin.pathExcludedColor;
             }
 
             if (isFullyUnlocked)
-                return this.treeDef.GetSkin().unlockedNodeColor;
+                return this.treeDef.Skin.unlockedNodeColor;
 
-            UnlockResult canUnlockResult = CanUnlockNode(node);
+            UnlockResult canUnlockResult = ValidateUnlock(node);
             if (!canUnlockResult.Success)
-                return this.treeDef.GetSkin().lockedNodeColor;
+                return this.treeDef.Skin.lockedNodeColor;
 
             if (currentProgress > 0)
             {
-                return Color.Lerp(this.treeDef.GetSkin().availableNodeColor, this.treeDef.GetSkin().unlockedNodeColor, (float)currentProgress / node.upgrades.Count);
+                return Color.Lerp(this.treeDef.Skin.availableNodeColor, this.treeDef.Skin.unlockedNodeColor, (float)currentProgress / node.upgrades.Count);
             }
 
-            return this.treeDef.GetSkin().availableNodeColor;
+            return this.treeDef.Skin.availableNodeColor;
         }
 
         public virtual UnlockResult TryUnlockNextUpgrade(UpgradeTreeNodeDef node, bool ignoreRequirements = false)
         {
             if (ignoreRequirements)
             {
-                foreach (var item in node.upgrades)
+                if (node.upgrades != null)
                 {
-                    UnlockUpgrade(item);
+                    foreach (var item in node.upgrades)
+                    {
+                        UnlockUpgrade(item);
+                    }
                 }
 
                 return UnlockResult.Succeeded();
@@ -154,9 +168,50 @@ namespace Protean
 
         protected virtual void OnNodeFullyUnlocked(UpgradeTreeNodeDef node)
         {
+
+
         }
 
-        protected virtual UnlockResult ValidateUnlock(UpgradeTreeNodeDef node)
+        public virtual void UnlockStartingNodes(bool IgnoreRequirements = true)
+        {
+            if (this.treeDef.nodes != null)
+            {
+                foreach (var node in this.treeDef.GetAllNodes())
+                {
+                    if (node.type == NodeType.Start && !IsNodeFullyUnlocked(node))
+                    {
+                        ForceUnlockNode(node);
+                    }
+                }
+            }
+        }
+
+        public void ForceUnlockNode(UpgradeTreeNodeDef node)
+        {
+            if (node == null || IsNodeFullyUnlocked(node))
+                return;
+
+            while (GetNodeProgress(node) < node.upgrades.Count)
+            {
+                TryUnlockNextUpgrade(node, true);
+            }
+        }
+
+        public virtual void UnlockUpgrade(UpgradeDef upgrade)
+        {
+            if (!activeEffects.ContainsKey(upgrade))
+            {
+                activeEffects[upgrade] = new List<UpgradeEffect>();
+                var effects = upgrade.CreateEffects();
+                foreach (var effect in effects)
+                {
+                    effect.TryApply(pawn);
+                    activeEffects[upgrade].Add(effect);
+                }
+            }
+            unlockedUpgrades.Add(upgrade);
+        }
+        public virtual UnlockResult ValidateUnlock(UpgradeTreeNodeDef node)
         {
             if (node?.upgrades == null || !node.upgrades.Any())
                 return UnlockResult.Failed(UpgradeUnlockError.InvalidNode, "Invalid node");
@@ -174,43 +229,50 @@ namespace Protean
             if (node.type != NodeType.Branch && node.path != null && !IsPathSelected(node.path))
                 return UnlockResult.Failed(UpgradeUnlockError.ExclusivePath, "Must select path at branch point first");
 
-            return ValidateTypeSpecificRules(node);
+            return ValidateTreeSpecificRules(node);
         }
 
-        public virtual void UnlockStartNode()
+        #endregion
+
+        protected abstract UnlockResult ValidateTreeSpecificRules(UpgradeTreeNodeDef node);
+
+
+
+        #region Progression Paths
+        public bool IsPathSelected(UpgradePathDef path) => selectedPaths.Contains(path);
+
+
+        public PathStatus GetPathStatusBetweenNodes(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
         {
-            if (this.treeDef.nodes != null)
+            if (IsPathUnlocked(StartNode, EndNode))
             {
-                foreach (var node in this.treeDef.GetAllNodes())
-                {
-                    if (node.type == NodeType.Start && !IsNodeFullyUnlocked(node))
-                    {
-                        while (CanUnlockNextUpgrade(node))
-                        {
-                            TryUnlockNextUpgrade(node);
-                        }
-                    }
-                }
+                return PathStatus.Unlocked;
             }
+            else if (IsPathActive(StartNode, EndNode))
+            {
+                return PathStatus.Active;
+            }
+            else
+            {
+                return PathStatus.Locked;
+            }
+        }
+        public bool IsPathActive(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
+        {
+            return IsNodeFullyUnlocked(StartNode) ||
+                  IsNodeFullyUnlocked(EndNode);
         }
 
-        public virtual void UnlockUpgrade(UpgradeDef upgrade)
+        public bool IsPathUnlocked(UpgradeTreeNodeDef StartNode, UpgradeTreeNodeDef EndNode)
         {
-            if (!activeEffects.ContainsKey(upgrade))
-            {
-                activeEffects[upgrade] = new List<UpgradeEffect>();
-                var effects = upgrade.CreateEffects();
-                foreach (var effect in effects)
-                {
-                    effect.Apply(pawn);
-                    activeEffects[upgrade].Add(effect);
-                }
-            }
-            unlockedUpgrades.Add(upgrade);
+            return IsNodeFullyUnlocked(StartNode) &&
+                  IsNodeFullyUnlocked(EndNode);
         }
+
+
+
         protected virtual bool ValidateUpgradePath(UpgradeTreeNodeDef node)
         {
-            // Branch nodes can be used for path selection if their path is available
             if (node.type == NodeType.Branch)
                 return node.path != null && CanSelectPath(node.path);
 
@@ -265,7 +327,15 @@ namespace Protean
 
         public abstract void OnPathSelected(UpgradePathDef path);
 
-        protected abstract UnlockResult ValidateTypeSpecificRules(UpgradeTreeNodeDef node);
+        #endregion
+ 
+
+
+        public virtual void DrawToolBar(Rect rect)
+        {
+ 
+        }
+
 
         public virtual void ExposeData()
         {
@@ -296,6 +366,8 @@ namespace Protean
                 {
                     OnPathSelected(path);
                 }
+
+                ReapplyUnlockedUpgrades();
             }
         }
     }

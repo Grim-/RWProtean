@@ -14,6 +14,35 @@ namespace Protean
         public List<UpgradePathDef> availablePaths;
         public TreeDisplayStrategyDef displayStrategy;
 
+
+
+        public UpgradeTreeNodeDef RootNode
+        {
+            get
+            {
+                if (nodes != null && nodes.Count > 0)
+                {
+                    return nodes[0];
+                }
+
+                Log.Error($"Failed to find RootNode for {defName} Talent Tree, UpgradeTreeDefs require atleast 1 node in the nodes list.");
+                return null;
+            }
+        }
+
+
+        public UpgradeTreeSkinDef Skin
+        {
+            get
+            {
+                if (skin == null)
+                {
+                    skin = DefDatabase<UpgradeTreeSkinDef>.GetNamed("DefaultTreeSkin");
+                }
+
+                return skin;
+            }
+        }
         public List<UpgradeTreeNodeDef> GetAllNodes()
         {
             if (nodes.NullOrEmpty())
@@ -51,14 +80,6 @@ namespace Protean
             return allNodes.ToList();
         }
 
-        public UpgradeTreeSkinDef GetSkin()
-        {
-            if (this.skin == null)
-            {
-                return DefDatabase<UpgradeTreeSkinDef>.GetNamed("DefaultTreeSkin");
-            }
 
-            return skin;
-        }
     }
 }
