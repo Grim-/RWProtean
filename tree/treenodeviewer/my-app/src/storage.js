@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'proteanDefs';
+const STORAGE_KEY = 'TalentedDefs';
 
 export const saveDef = (def) => {
   const defs = loadDefs();

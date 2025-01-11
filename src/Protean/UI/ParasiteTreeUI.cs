@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Talented;
 using UnityEngine;
 using Verse;
 
 namespace Protean
 {
-    public class ParasiteTreeUI : Window
+    public class ParasiteTreeUI : Talented.TalentTreeDisplayWindow
     {
         private readonly Gene_Parasite parasiteGene;
         private readonly UpgradeTreeDef treeDef;
@@ -23,7 +24,7 @@ namespace Protean
 
         public override Vector2 InitialSize => new Vector2(450f, 800f);
 
-        public ParasiteTreeUI(Gene_Parasite parasite, UpgradeTreeDef tree, BaseTreeHandler handler, TreeDisplayStrategyDef displayStrategyDef)
+        public ParasiteTreeUI(Gene_Parasite parasite, UpgradeTreeDef tree, BaseTreeHandler handler, TreeDisplayStrategyDef displayStrategyDef) :base(parasite, tree, handler, displayStrategyDef)
         {
             if (displayStrategyDef == null)
             {

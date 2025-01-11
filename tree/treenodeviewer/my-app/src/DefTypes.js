@@ -1,17 +1,17 @@
 export const DefTypes = {
-  UPGRADE: 'Protean.UpgradeDef',
-  UPGRADE_TREE: 'Protean.UpgradeTreeDef',
-  UPGRADE_TREE_NODE: 'Protean.UpgradeTreeNodeDef',
-  UPGRADE_PATH: 'Protean.UpgradePathDef'
+  UPGRADE: 'Talented.UpgradeDef',
+  UPGRADE_TREE: 'Talented.UpgradeTreeDef',
+  UPGRADE_TREE_NODE: 'Talented.UpgradeTreeNodeDef',
+  UPGRADE_PATH: 'Talented.UpgradePathDef'
 };
 // Types available for editing in the DefEditor
 export const EditableDefTypes = {
-  UPGRADE: 'Protean.UpgradeDef',
-  UPGRADE_TREE: 'Protean.UpgradeTreeDef',
-  UPGRADE_PATH: 'Protean.UpgradePathDef'
+  UPGRADE: 'Talented.UpgradeDef',
+  UPGRADE_TREE: 'Talented.UpgradeTreeDef',
+  UPGRADE_PATH: 'Talented.UpgradePathDef'
 };
 export const DefStructures = {
-  'Protean.UpgradeDef': {
+  'Talented.UpgradeDef': {
     required: ['defName', 'parasiteLevelRequired', 'pointCost'],
     properties: {
       parasiteLevelRequired: 'number',
@@ -23,7 +23,7 @@ export const DefStructures = {
       organEffects: 'defList'
     }
   },
-  'Protean.UpgradeTreeDef': {
+  'Talented.UpgradeTreeDef': {
     required: ['defName', 'dimensions'],
     properties: {
       dimensions: {
@@ -37,7 +37,7 @@ export const DefStructures = {
       displayStrategy: 'string'
     }
   },
-  'Protean.UpgradeTreeNodeDef': {
+  'Talented.UpgradeTreeNodeDef': {
     required: ['defName', 'position', 'type'],
     properties: {
       upgrades: 'defList',
@@ -61,7 +61,7 @@ export const DefStructures = {
       }
     }
   },
-  'Protean.UpgradePathDef': {
+  'Talented.UpgradePathDef': {
     required: ['defName'],
     properties: {
       exclusiveWith: 'defList',

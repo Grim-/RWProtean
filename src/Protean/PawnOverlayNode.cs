@@ -6,6 +6,7 @@ namespace Protean
     public class PawnOverlayNode : PawnRenderNode
     {
         public new PawnOverlayNodeProperties Props => (PawnOverlayNodeProperties)props;
+        private Gene_Parasite ParasiteGene = null;
 
         public PawnOverlayNode(Pawn pawn, PawnRenderNodeProperties props, PawnRenderTree tree) : base(pawn, props, tree)
         {
@@ -33,13 +34,19 @@ namespace Protean
             return basePath + $"_{pawn.story.bodyType.defName}";
         }
 
+
+
+
         public override Color ColorFor(Pawn pawn)
         {
-            Gene_Parasite _Parasite = pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
-
-            if (_Parasite != null && _Parasite.SuitColor != default(Color))
+            if (ParasiteGene == null)
             {
-                return _Parasite.SuitColor;
+                ParasiteGene = pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
+            }
+
+            if (ParasiteGene != null && ParasiteGene.SuitColor != default(Color))
+            {
+                return ParasiteGene.SuitColor;
             }
 
             return base.ColorFor(pawn);

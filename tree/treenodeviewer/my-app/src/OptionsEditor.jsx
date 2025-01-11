@@ -5,29 +5,29 @@ const OptionsEditor = () => {
   const [defTypes, setDefTypes] = useState([
     {
       key: 'UPGRADE',
-      value: 'Protean.UpgradeDef',
+      value: 'Talented.UpgradeDef',
       editable: true
     },
     {
       key: 'UPGRADE_TREE',
-      value: 'Protean.UpgradeTreeDef',
+      value: 'Talented.UpgradeTreeDef',
       editable: true
     },
     {
       key: 'UPGRADE_TREE_NODE',
-      value: 'Protean.UpgradeTreeNodeDef',
+      value: 'Talented.UpgradeTreeNodeDef',
       editable: false
     },
     {
       key: 'UPGRADE_PATH',
-      value: 'Protean.UpgradePathDef',
+      value: 'Talented.UpgradePathDef',
       editable: true
     }
   ]);
 
   const [structures, setStructures] = useState([
     {
-      type: 'Protean.UpgradeDef',
+      type: 'Talented.UpgradeDef',
       fields: [
         { name: 'parasiteLevelRequired', type: 'number', required: true },
         { name: 'prerequisites', type: 'defList', required: false },

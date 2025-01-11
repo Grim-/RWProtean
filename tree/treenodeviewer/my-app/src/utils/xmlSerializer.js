@@ -70,17 +70,17 @@ export const exportToXml = (nodes, paths) => {
   let xml = '<?xml version="1.0" encoding="utf-8" ?>\n<Defs>\n';
 
   paths?.forEach(path => {
-    xml += `  <Protean.UpgradePathDef>\n`;
+    xml += `  <Talented.UpgradePathDef>\n`;
     xml += `    <defName>${path.name}</defName>\n`;
     xml += `    <pathDescription>${path.description}</pathDescription>\n`;
-    xml += `  </Protean.UpgradePathDef>\n\n`;
+    xml += `  </Talented.UpgradePathDef>\n\n`;
   });
 
   nodes.forEach(node => {
-    const defType = node.upgrade ? 'Protean.UpgradeTreeNodeDef' :
-                   node.dimensions ? 'Protean.UpgradeTreeDef' :
-                   node.pointCost ? 'Protean.UpgradeDef' :
-                   'Protean.UpgradeTreeNodeDef';
+    const defType = node.upgrade ? 'Talented.UpgradeTreeNodeDef' :
+                   node.dimensions ? 'Talented.UpgradeTreeDef' :
+                   node.pointCost ? 'Talented.UpgradeDef' :
+                   'Talented.UpgradeTreeNodeDef';
 
     xml += `  <${defType}>\n`;
     xml += `    <defName>${node.id}</defName>\n`;
@@ -129,7 +129,7 @@ export const importFromXml = (xmlContents) => {
   xmlContents.forEach(content => {
     const xmlDoc = parser.parseFromString(content, "text/xml");
 
-    Array.from(xmlDoc.getElementsByTagName("Protean.UpgradePathDef")).forEach(pathDef => {
+    Array.from(xmlDoc.getElementsByTagName("Talented.UpgradePathDef")).forEach(pathDef => {
       paths.push({
         id: pathDef.getElementsByTagName("defName")[0].textContent,
         name: pathDef.getElementsByTagName("defName")[0].textContent,
@@ -137,7 +137,7 @@ export const importFromXml = (xmlContents) => {
       });
     });
 
-    Array.from(xmlDoc.getElementsByTagName("Protean.UpgradeTreeNodeDef")).forEach(nodeDef => {
+    Array.from(xmlDoc.getElementsByTagName("Talented.UpgradeTreeNodeDef")).forEach(nodeDef => {
       const position = nodeDef.getElementsByTagName("position")[0]?.textContent || "(0,0)";
       const [x, y] = position.replace(/[()]/g, '').split(',').map(n => parseInt(n) * 50);
 

@@ -47,9 +47,6 @@ namespace Protean
             Widgets.Label(parasiteLabelRect, $"Parasite Level: {Parasite.CurrentLevel}");
             curX += levelWidth + padding;
 
-            //var evoPointsLabelRect = new Rect(curX, rect.y + padding, levelWidth, rect.height - padding * 2);
-            //Widgets.DrawHighlight(evoPointsLabelRect);
-            //Widgets.Label(evoPointsLabelRect, $"Evolution Points: {Parasite.TalentPointsAvailable}");
             curX += levelWidth + padding;
 
             Text.Anchor = TextAnchor.UpperLeft;

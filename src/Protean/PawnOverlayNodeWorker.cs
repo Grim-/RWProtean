@@ -20,10 +20,6 @@ namespace Protean
             Material material = overlayNode.GraphicFor(parms.pawn).MatAt(parms.facing);
             if (material == null) return;
 
-            Color overlayColor = overlayNode.Props.overlayColor;
-            overlayColor.a = overlayNode.Props.overlayAlpha;
-            material.SetColor("_ColorOne", overlayColor);
-            material.color = overlayColor;
 
             Vector3 drawLoc;
             Vector3 pivot;
@@ -42,6 +38,24 @@ namespace Protean
             PawnGraphicDrawRequest request = new PawnGraphicDrawRequest(node, mesh, material);
             request.preDrawnComputedMatrix = Matrix4x4.TRS(drawLoc, quat, scale);
             requests.Add(request);
+        }
+        public override MaterialPropertyBlock GetMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+        {
+            var matPropBlock = base.GetMaterialPropertyBlock(node, material, parms);
+            if (matPropBlock == null) return null;
+
+            var overlayNode = node as PawnOverlayNode;
+            if (overlayNode == null) return matPropBlock;
+
+            Gene_Parasite parasite = parms.pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
+            Color color = (parasite != null && parasite.SuitColor != default(Color))
+                ? parasite.SuitColor
+                : overlayNode.Props.overlayColor;
+
+            color.a = overlayNode.Props.overlayAlpha;
+            matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * color);
+
+            return matPropBlock;
         }
 
         public override Vector3 OffsetFor(PawnRenderNode node, PawnDrawParms parms, out Vector3 pivot)
@@ -69,20 +83,20 @@ namespace Protean
 
         public override Vector3 ScaleFor(PawnRenderNode node, PawnDrawParms parms)
         {
-            if (node is PawnOverlayNode overlayNode && overlayNode.Props.graphicData != null)
-            {
-                Vector2 baseSize = overlayNode.Props.graphicData.drawSize;
+            //if (node is PawnOverlayNode overlayNode && overlayNode.Props.graphicData != null)
+            //{
+            //    Vector2 baseSize = overlayNode.Props.graphicData.drawSize;
 
-                float pulseAmount = 0.05f;
-                float pulseSpeed = 1f;
-                float scaleFactor = 1f + (Mathf.Sin(Time.realtimeSinceStartup * pulseSpeed) * pulseAmount);
+            //    float pulseAmount = 0.05f;
+            //    float pulseSpeed = 1f;
+            //    float scaleFactor = 1f + (Mathf.Sin(Time.realtimeSinceStartup * pulseSpeed) * pulseAmount);
 
-                return new Vector3(
-                    baseSize.x * scaleFactor,
-                    1f, 
-                    baseSize.y * scaleFactor
-                );
-            }
+            //    return new Vector3(
+            //        baseSize.x * scaleFactor,
+            //        1f, 
+            //        baseSize.y * scaleFactor
+            //    );
+            //}
             return base.ScaleFor(node, parms);
         }
 

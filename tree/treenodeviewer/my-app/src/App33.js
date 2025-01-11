@@ -66,7 +66,7 @@ const NodeEditor = () => {
         const xmlDoc = parser.parseFromString(text, "text/xml");
 
         // Import paths from this file
-        const pathDefs = xmlDoc.getElementsByTagName("Protean.UpgradePathDef");
+        const pathDefs = xmlDoc.getElementsByTagName("Talented.UpgradePathDef");
         const newPaths = Array.from(pathDefs).map(pathDef => ({
           id: pathDef.getElementsByTagName("defName")[0].textContent,
           name: pathDef.getElementsByTagName("defName")[0].textContent,
@@ -74,7 +74,7 @@ const NodeEditor = () => {
         }));
 
         // Import nodes from this file
-        const nodeDefs = xmlDoc.getElementsByTagName("Protean.UpgradeTreeNodeDef");
+        const nodeDefs = xmlDoc.getElementsByTagName("Talented.UpgradeTreeNodeDef");
         const newNodes = Array.from(nodeDefs).map(nodeDef => {
           const position = nodeDef.getElementsByTagName("position")[0]?.textContent || "(0,0)";
           const [x, y] = position.replace(/[()]/g, '').split(',').map(n => parseInt(n) * 50);
@@ -221,15 +221,15 @@ const NodeEditor = () => {
 
       // Export paths
       paths.forEach(path => {
-        xml += `  <Protean.UpgradePathDef>\n`;
+        xml += `  <Talented.UpgradePathDef>\n`;
         xml += `    <defName>${path.name}</defName>\n`;
         xml += `    <pathDescription>${path.description}</pathDescription>\n`;
-        xml += `  </Protean.UpgradePathDef>\n\n`;
+        xml += `  </Talented.UpgradePathDef>\n\n`;
       });
 
       // Export nodes
       nodes.forEach(node => {
-        xml += `  <Protean.UpgradeTreeNodeDef>\n`;
+        xml += `  <Talented.UpgradeTreeNodeDef>\n`;
         xml += `    <defName>${node.id}</defName>\n`;
         xml += `    <position>(${Math.round(node.x/50)},${Math.round(node.y/50)})</position>\n`;
         xml += `    <type>${node.type}</type>\n`;
@@ -260,7 +260,7 @@ const NodeEditor = () => {
           });
           xml += `    </branchPaths>\n`;
         }
-        xml += `  </Protean.UpgradeTreeNodeDef>\n\n`;
+        xml += `  </Talented.UpgradeTreeNodeDef>\n\n`;
       });
 
       xml += '</Defs>';
@@ -282,7 +282,7 @@ const NodeEditor = () => {
         const xmlDoc = parser.parseFromString(importXml, "text/xml");
 
         // Import paths
-        const pathDefs = xmlDoc.getElementsByTagName("Protean.UpgradePathDef");
+        const pathDefs = xmlDoc.getElementsByTagName("Talented.UpgradePathDef");
         const newPaths = Array.from(pathDefs).map(pathDef => ({
           id: pathDef.getElementsByTagName("defName")[0].textContent,
           name: pathDef.getElementsByTagName("defName")[0].textContent,
@@ -290,7 +290,7 @@ const NodeEditor = () => {
         }));
 
         // Import nodes
-        const nodeDefs = xmlDoc.getElementsByTagName("Protean.UpgradeTreeNodeDef");
+        const nodeDefs = xmlDoc.getElementsByTagName("Talented.UpgradeTreeNodeDef");
         const newNodes = Array.from(nodeDefs).map(nodeDef => {
           const position = nodeDef.getElementsByTagName("position")[0]?.textContent || "(0,0)";
           const [x, y] = position.replace(/[()]/g, '').split(',').map(n => parseInt(n) * 50);

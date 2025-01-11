@@ -113,7 +113,7 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
         const xmlDoc = parser.parseFromString(text, "text/xml");
 
         // Import paths from this file
-        const pathDefs = xmlDoc.getElementsByTagName("Protean.UpgradePathDef");
+        const pathDefs = xmlDoc.getElementsByTagName("Talented.UpgradePathDef");
         const newPaths = Array.from(pathDefs).map(pathDef => ({
           id: pathDef.getElementsByTagName("defName")[0].textContent,
           name: pathDef.getElementsByTagName("defName")[0].textContent,
@@ -122,7 +122,7 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
         }));
 
         // Import nodes from this file
-        const nodeDefs = xmlDoc.getElementsByTagName("Protean.UpgradeTreeNodeDef");
+        const nodeDefs = xmlDoc.getElementsByTagName("Talented.UpgradeTreeNodeDef");
         const newNodes = Array.from(nodeDefs).map(nodeDef => {
           const position = nodeDef.getElementsByTagName("position")[0]?.textContent || "(0,0)";
           const [x, y] = position.replace(/[()]/g, '').split(',').map(n => parseInt(n) * 50);
@@ -169,19 +169,19 @@ const NodeEditor = ({ nodes, setNodes, paths, setPaths }) => {
 
     // Existing paths
     paths.forEach(path => {
-      xml += `  <Protean.UpgradePathDef>\n`;
+      xml += `  <Talented.UpgradePathDef>\n`;
       xml += `    <defName>${path.name}</defName>\n`;
       xml += `    <pathDescription>${path.description}</pathDescription>\n`;
-      xml += `  </Protean.UpgradePathDef>\n\n`;
+      xml += `  </Talented.UpgradePathDef>\n\n`;
     });
 
     // Existing nodes + any other node-like defs
     nodes.forEach(node => {
       // Determine the correct def type based on node properties
-      const defType = node.upgrade ? 'Protean.UpgradeTreeNodeDef' :
-                     node.dimensions ? 'Protean.UpgradeTreeDef' :
-                     node.pointCost ? 'Protean.UpgradeDef' :
-                     'Protean.UpgradeTreeNodeDef';
+      const defType = node.upgrade ? 'Talented.UpgradeTreeNodeDef' :
+                     node.dimensions ? 'Talented.UpgradeTreeDef' :
+                     node.pointCost ? 'Talented.UpgradeDef' :
+                     'Talented.UpgradeTreeNodeDef';
 
       xml += `  <${defType}>\n`;
       xml += `    <defName>${node.id}</defName>\n`;
