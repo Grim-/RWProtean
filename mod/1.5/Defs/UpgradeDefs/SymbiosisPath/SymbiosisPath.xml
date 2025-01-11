@@ -1,60 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-    <!-- Symbiosis Path
+
+  <!-- Symbiosis Paths -->
   <Protean.UpgradePathDef>
     <defName>SymbiosisPath</defName>
     <pathDescription>22222222</pathDescription>
     <exclusiveWith>
       <li>ParasitePath</li>
     </exclusiveWith>
-  </Protean.UpgradePathDef> -->
+  </Protean.UpgradePathDef>
 
-  <!-- Symbiosis Path NODES
-  <Protean.UpgradeTreeNodeDef>
-     <defName>SymbiosisPathNode1</defName>
-     <position>(1,4)</position>
-     <type>Branch</type>
-     <upgrade>CombatReflexesUpgrade</upgrade>
-     <path>SymbiosisPath</path>
-     <connections>
-       <li>SymbiosisPathNode2</li>
-       <li>SymbiosisPathNode3</li>
-     </connections>
-     <branchPaths>
-       <li>
-         <path>SymbiosisPathBranch1_A</path>
-         <nodes>
-           <li>SymbiosisPathNode2</li>
-         </nodes>
-       </li>
-       <li>
-         <path>SymbiosisPathBranch1_B</path>
-         <nodes>
-           <li>SymbiosisPathNode3</li>
-         </nodes>
-       </li>
-     </branchPaths>
-   </Protean.UpgradeTreeNodeDef>
-
-  <Protean.UpgradeTreeNodeDef>
-    <defName>SymbiosisPathNode2</defName>
-    <position>(1,4)</position>
-    <type>Normal</type>
-    <upgrade>AuxiliaryHeartUpgrade</upgrade>
-    <path>SymbiosisPathBranch1_A</path>
-    <uiIcon>button_agree</uiIcon>
-  </Protean.UpgradeTreeNodeDef>
-
-  <Protean.UpgradeTreeNodeDef>
-    <defName>SymbiosisPathNode3</defName>
-    <position>(1,4)</position>
-    <type>Normal</type>
-    <upgrade>SymbioticConsciousnessUpgrade</upgrade>
-    <path>SymbiosisPathBranch1_B</path>
-    <uiIcon>lil_roundframe_ready</uiIcon>
-  </Protean.UpgradeTreeNodeDef>
-
-    <Protean.UpgradePathDef>
+  <Protean.UpgradePathDef>
     <defName>SymbiosisPathBranch1_A</defName>
     <pathDescription>Auxiliary Heart specialization</pathDescription>
     <exclusiveWith>
@@ -68,5 +24,89 @@
     <exclusiveWith>
       <li>SymbiosisPathBranch1_A</li>
     </exclusiveWith>
-  </Protean.UpgradePathDef>-->
+  </Protean.UpgradePathDef>
+
+
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>SymbiosisPathNode1</defName>
+    <position>(23,12)</position>
+    <type>Branch</type>
+    <upgrades>
+      <li>SensoryEnhancementUpgrade</li>
+      <li>CombatReflexesUpgrade</li>
+      <li>AuxiliaryHeartUpgrade</li>
+    </upgrades>
+    <path>SymbiosisPath</path>
+    <connections>
+      <li>SymbiosisPathNode2</li>
+      <li>SymbiosisPathNode3</li>
+    </connections>
+    <branchPaths>
+      <li>
+        <path>SymbiosisPathBranch1_A</path>
+        <nodes>
+          <li>SymbiosisPathNode2</li>
+        </nodes>
+      </li>
+      <li>
+        <path>SymbiosisPathBranch1_B</path>
+        <nodes>
+          <li>SymbiosisPathNode3</li>
+        </nodes>
+      </li>
+    </branchPaths>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>SymbiosisPathNode2</defName>
+    <position>(26,8)</position>
+    <type>Normal</type>
+    <upgrades>
+      <li>AuxiliaryHeartUpgrade</li>
+    </upgrades>
+    <path>SymbiosisPathBranch1_A</path>
+    <connections>
+      <li>node_1733542050780</li>
+    </connections>
+    <hide>true</hide>
+    <prerequisitesToShow>
+      <li>SensoryEnhancementUpgrade</li>
+    </prerequisitesToShow>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>node_1733542050780</defName>
+    <position>(26,5)</position>
+    <type>Normal</type>
+    <upgrades>
+      <li>AuxiliaryHeartUpgrade2</li>
+    </upgrades>
+    <path>SymbiosisPathBranch1_A</path>
+    <connections>
+      <li>node_1733542077413</li>
+    </connections>
+  </Protean.UpgradeTreeNodeDef>
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>node_1733542077413</defName>
+    <position>(26,1)</position>
+    <type>Normal</type>
+    <upgrades>
+      <li>AuxiliaryHeartUpgrade3</li>
+    </upgrades>
+    <path>SymbiosisPathBranch1_A</path>
+  </Protean.UpgradeTreeNodeDef>
+
+
+  <Protean.UpgradeTreeNodeDef>
+    <defName>SymbiosisPathNode3</defName>
+    <position>(21,8)</position>
+    <type>Normal</type>
+    <upgrades>
+      <li>SymbioticConsciousnessUpgrade</li>
+    </upgrades>
+    <path>SymbiosisPathBranch1_B</path>
+  </Protean.UpgradeTreeNodeDef>
+
 </Defs>

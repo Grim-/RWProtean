@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <!-- Enhanced Sensory Processing -->
+  <Protean.UpgradeDef>
+      <defName>SensoryEnhancementUpgrade</defName>
+      <label>Sensory Enhancement</label>
+            <uiIconPath>SkullIcon</uiIconPath>
+      <description>Enhances neural processing of sensory input, improving reaction time and awareness.</description>
+      <parasiteLevelRequired>1</parasiteLevelRequired>
+      <hediffEffects>
+          <li>
+              <hediffDef>ParasiteSensoryBoost</hediffDef>
+          </li>
+      </hediffEffects>
+  </Protean.UpgradeDef>
+
+  <HediffDef>
+      <defName>ParasiteSensoryBoost</defName>
+      <label>enhanced senses</label>
+      <description>Neural pathways have been optimized for faster sensory processing.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <isBad>false</isBad>
+      <stages>
+          <li>
+              <statOffsets>
+                  <AimingDelayFactor>-0.15</AimingDelayFactor>
+                  <ShootingAccuracyPawn>2.0</ShootingAccuracyPawn>
+              </statOffsets>
+          </li>
+      </stages>
+  </HediffDef>
+
+  </Defs>

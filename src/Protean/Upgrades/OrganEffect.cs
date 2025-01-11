@@ -9,7 +9,7 @@ namespace Protean
     {
         public BodyPartDef targetOrgan;
         public HediffDef addedOrganHediff;
-        public bool isAddition;
+        public bool isAddition = true;
         private List<Hediff> addedParts = new List<Hediff>();
 
 
@@ -17,32 +17,14 @@ namespace Protean
         {
             addedParts.RemoveAll(part => part == null || !pawn.health.hediffSet.HasHediff(part.def));
             bool targetOrganExists = pawn.health.hediffSet.hediffs.Any(h => h.def == addedOrganHediff);
-            if (isAddition)
-            {
-                bool AnyAddedPartsExist = addedParts.Any();
-
-                return AnyAddedPartsExist || targetOrganExists;
-            }
-
-            var targetParts = pawn.health.hediffSet.GetNotMissingParts()
-                .Where(part => part.def == targetOrgan);
-
-            return targetParts.Count() > 0;
+            return targetOrganExists;
         }
 
         protected override void Apply(Pawn pawn)
         {
             Hediff addedPart = null;
 
-            if (isAddition)
-            {
-                addedPart = pawn.health.AddHediff(addedOrganHediff);
-            }
-            else
-            {
-                BodyPartRecord foundPart = pawn.health.hediffSet.GetNotMissingParts().Where(x => x.def == targetOrgan).FirstOrDefault();
-                addedPart = pawn.health.AddHediff(addedOrganHediff, foundPart);
-            }
+            addedPart = pawn.health.AddHediff(addedOrganHediff);
             addedParts.Add(addedPart);
         }
 

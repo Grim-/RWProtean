@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <StatDef>
+      <defName>ProteanBiomassStorage</defName>
+      <label>stored biomass</label>
+      <description>Amount of excess biomass the protean has accumulated.</description>
+      <defaultBaseValue>0</defaultBaseValue>
+      <minValue>0</minValue>
+      <maxValue>1000</maxValue>
+  </StatDef>
+</Defs>

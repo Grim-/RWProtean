@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <AbilityDef>
+    <defName>Protean_ToggleSuit</defName>
+    <label>Toggle Suit</label>
+    <description>wwwwwwwwwwwwwwwwwww.</description>
+    <iconPath>button_agree</iconPath>
+    <cooldownTicksRange>60</cooldownTicksRange>
+    <category>Hemogen</category>
+    <displayOrder>200</displayOrder>
+    <aiCanUse>true</aiCanUse>
+    <warmupEffecter>WaterMist</warmupEffecter>
+    <emittedFleck>ShockwaveFast</emittedFleck>
+    <displayGizmoWhileUndrafted>True</displayGizmoWhileUndrafted>
+    <disableGizmoWhileUndrafted>False</disableGizmoWhileUndrafted>
+    <stunTargetWhileCasting>false</stunTargetWhileCasting>
+    <verbProperties>
+      <verbClass>Verb_CastAbility</verbClass>
+      <range>0</range>
+      <warmupTime>0</warmupTime>
+      <soundCast>FireSpew_Resolve</soundCast>
+      <targetable>False</targetable>
+      <nonInterruptingSelfCast>true</nonInterruptingSelfCast>
+    </verbProperties>
+    <comps>
+      <li Class="Protean.CompProperties_ToggleHediff">
+        <hediffDef>Protean_SuitActive</hediffDef>
+      </li>
+    </comps>
+  </AbilityDef>
+</Defs>

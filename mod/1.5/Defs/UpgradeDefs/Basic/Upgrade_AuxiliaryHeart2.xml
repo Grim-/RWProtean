@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <Protean.UpgradeDef>
+   <defName>AuxiliaryHeartUpgrade2</defName>
+   <label>Advanced Auxiliary Heart</label>
+         <uiIconPath>DragonBall1</uiIconPath>
+   <description>Further enhances the auxiliary heart's capabilities with advanced parasitic tissue.</description>
+   <parasiteLevelRequired>5</parasiteLevelRequired>
+   <hediffEffects>
+       <li>
+           <hediffDef>EnhancedAuxiliaryHeart</hediffDef>
+       </li>
+   </hediffEffects>
+</Protean.UpgradeDef>
+
+<HediffDef ParentName="AddedBodyPartBase">
+ <defName>EnhancedAuxiliaryHeart</defName>
+ <label>enhanced auxiliary heart</label>
+ <description>The auxiliary heart has been enhanced with advanced parasitic tissue.</description>
+ <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+ <addedPartProps>
+     <solid>true</solid>
+     <partEfficiency>1.0</partEfficiency>
+     <betterThanNatural>true</betterThanNatural>
+ </addedPartProps>
+ <stages>
+     <li>
+         <statOffsets>
+             <MoveSpeed>0.25</MoveSpeed>
+             <WorkSpeedGlobal>0.15</WorkSpeedGlobal>
+         </statOffsets>
+         <capMods>
+             <li>
+                 <capacity>BloodPumping</capacity>
+                 <offset>0.75</offset>
+             </li>
+         </capMods>
+     </li>
+ </stages>
+</HediffDef>
+
+</Defs>

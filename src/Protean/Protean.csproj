@@ -83,14 +83,25 @@
   <ItemGroup>
     <Compile Include="ActiveTreeHandler.cs" />
     <Compile Include="BaseTreeHandler.cs" />
+    <Compile Include="CompAbilityEffect_Toggleable.cs" />
+    <Compile Include="CompProperties_ToggleHediff.cs" />
     <Compile Include="DisplayStrategies\ConcentricRingStrategy.cs" />
-    <Compile Include="ConnectionAnimation.cs" />
+    <Compile Include="Tree\ConnectionAnimation.cs" />
+    <Compile Include="DisplayStrategies\FixedPositionStrategy.cs" />
     <Compile Include="DisplayStrategies\ForceDirectedStrategy.cs" />
     <Compile Include="DisplayStrategies\ITreeDisplayStrategy.cs" />
+    <Compile Include="DisplayStrategies\RadialTreeStrategy.cs" />
     <Compile Include="DisplayStrategies\TreeDisplayStrategyDef.cs" />
+    <Compile Include="EventManager.cs" />
+    <Compile Include="EventPatches.cs" />
     <Compile Include="NodeFadeAnimation.cs" />
     <Compile Include="PassiveTreeHandler.cs" />
     <Compile Include="PathStatus.cs" />
+    <Compile Include="BasicResourceGeneDef.cs" />
+    <Compile Include="Gene_BasicResource.cs" />
+    <Compile Include="PawnOverlayNode.cs" />
+    <Compile Include="PawnOverlayNodeProperties.cs" />
+    <Compile Include="PawnOverlayNodeWorker.cs" />
     <Compile Include="Tree\BranchPathData.cs" />
     <Compile Include="Tree\NodeType.cs" />
     <Compile Include="Tree\UpgradeTreeSkinDef.cs" />

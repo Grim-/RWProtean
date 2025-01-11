@@ -13,5 +13,9 @@ namespace Protean
 
         public static TreeDisplayStrategyDef VerticalStrategy;
         public static TreeDisplayStrategyDef RingStrategy;
+
+        public static HediffDef Protean_SuitActive;
+
+        public static AnimationDef SymbiotePulse;
     }
 }

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <HediffDef>
+    <defName>Protean_SuitActive</defName>
+    <label>Suit Manifested</label>
+    <description>Manifested</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <defaultLabelColor>(0.5, 0, 0.5)</defaultLabelColor>
+    <maxSeverity>1.0</maxSeverity>
+    <isBad>false</isBad>
+    <renderNodeProperties>
+      <li Class="Protean.PawnOverlayNodeProperties">
+        <texPath>Animations/Moon1</texPath>
+         <tagDef>Head</tagDef>
+        <graphicData>
+          <texPath>Suit/HeadNoColor/Goohead</texPath>
+          <graphicClass>Graphic_Multi</graphicClass>
+          <drawSize>1.05</drawSize>
+          <shaderParameters>
+            <_Clipping>0.5</_Clipping>
+          </shaderParameters>
+        </graphicData>
+        <overlayColor>(1, 1, 1)</overlayColor>
+        <overlayAlpha>1</overlayAlpha>
+        <overlayLayer>Head</overlayLayer>
+        <offset>(0, 0.1, 0.4)</offset>
+        <layerOffset>1000</layerOffset>
+        <workerClass>Protean.PawnOverlayNodeWorker</workerClass>
+        <shaderTypeDef>Cutout</shaderTypeDef>
+      </li>
+      <li Class="Protean.PawnOverlayNodeProperties">
+        <texPath>Animations/Moon1</texPath>
+         <tagDef>Body</tagDef>
+        <graphicData>
+          <texPath>Suit/BodyNoColor/Goosuit</texPath>
+          <graphicClass>Graphic_Multi</graphicClass>
+          <drawSize>1.1</drawSize>
+          <shaderParameters>
+            <_AlphaMask>/Things/Riika/RikaBodymask</_AlphaMask>
+            <_Clipping>0.5</_Clipping>
+          </shaderParameters>
+        </graphicData>
+        <overlayColor>(1, 1, 1)</overlayColor>
+        <overlayAlpha>1</overlayAlpha>
+        <overlayLayer>Head</overlayLayer>
+        <offset>(0, 0,0)</offset>
+        <layerOffset>5000</layerOffset>
+        <workerClass>Protean.PawnOverlayNodeWorker</workerClass>
+        <shaderTypeDef>Cutout</shaderTypeDef>
+        <useBodyTypeVariants>true</useBodyTypeVariants>
+      </li>
+    </renderNodeProperties>
+    <stages>
+    </stages>
+    <comps>
+      <li Class="HediffCompProperties_VerbGiver">
+        <tools>
+          <li>
+            <label>Assisted Punch</label>
+            <capacities>
+              <li>Scratch</li>
+            </capacities>
+            <power>30</power>
+            <cooldownTime>2</cooldownTime>
+          </li>
+        </tools>
+        <verbs>
+        </verbs>
+      </li>
+    </comps>
+  </HediffDef>
+
+  <AnimationDef>
+  <defName>SymbiotePulse</defName>
+  <durationTicks>120</durationTicks>
+  <startOnRandomTick>true</startOnRandomTick>
+  <animationParts>
+    <li>
+      <key>Root</key>
+      <value>
+        <workerClass>Protean.AnimationWorker_SymbiotePulse</workerClass>
+        <keyframes>
+          <li>
+            <tick>0</tick>
+            <scale>(1.0, 1.0, 1.0)</scale>
+          </li>
+          <li>
+            <tick>30</tick>
+            <scale>(1.05, 1.0, 1.05)</scale>
+          </li>
+          <li>
+            <tick>60</tick>
+            <scale>(1.0, 1.0, 1.0)</scale>
+          </li>
+          <li>
+            <tick>90</tick>
+            <scale>(0.95, 1.0, 0.95)</scale>
+          </li>
+          <li>
+            <tick>120</tick>
+            <scale>(1.0, 1.0, 1.0)</scale>
+          </li>
+        </keyframes>
+      </value>
+    </li>
+  </animationParts>
+</AnimationDef>
+</Defs>

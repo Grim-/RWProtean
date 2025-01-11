@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <!-- Path Selection Messages -->
+  <Protean.Path.Selected>Selected {0} upgrade path.</Protean.Path.Selected>
+  <Protean.Path.CannotSelect>Cannot select this path - conflicts with existing selection</Protean.Path.CannotSelect>
+  
+  <!-- Node Tooltips -->
+  <Protean.Node.UnknownUpgrade>Unknown upgrade</Protean.Node.UnknownUpgrade>
+  <Protean.Node.AllUpgradesUnlocked>All upgrades unlocked</Protean.Node.AllUpgradesUnlocked>
+  <Protean.Node.Progress>Progress: {0}/{1}</Protean.Node.Progress>
+  <Protean.Node.UnlockedUpgrades>Unlocked Upgrades:</Protean.Node.UnlockedUpgrades>
+  <Protean.Node.NextUpgrade>Next Upgrade: {0}</Protean.Node.NextUpgrade>
+  
+  <!-- Debug Information -->
+  <Protean.Debug.Info>Debug Info</Protean.Debug.Info>
+  <Protean.Debug.Node>Node: {0}</Protean.Debug.Node>
+  <Protean.Debug.Type>Type: {0}</Protean.Debug.Type>
+  <Protean.Debug.FullyUnlocked>Fully Unlocked: {0}</Protean.Debug.FullyUnlocked>
+  <Protean.Debug.CanUnlockNext>Can Unlock Next: {0}</Protean.Debug.CanUnlockNext>
+  <Protean.Debug.Path>Path: {0}</Protean.Debug.Path>
+  <Protean.Debug.PathSelected>Path Selected: {0}</Protean.Debug.PathSelected>
+  <Protean.Debug.UnlockError>Unlock Error: {0}</Protean.Debug.UnlockError>
+  
+  <!-- Error Messages -->
+  <Protean.Error.DisplayStrategy>Display Strategy Def was null</Protean.Error.DisplayStrategy>
+</LanguageData>

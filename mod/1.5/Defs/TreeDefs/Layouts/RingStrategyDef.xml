@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <Protean.TreeDisplayStrategyDef>
+      <defName>RingStrategy</defName>
+      <strategyClass>Protean.ConcentricRingStrategy</strategyClass>
+    </Protean.TreeDisplayStrategyDef>
+</Defs>

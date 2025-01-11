@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace Protean
@@ -36,6 +37,41 @@ namespace Protean
             base.PostMake();
             passiveTree = new PassiveTreeHandler(pawn, this, ProteanDefOf.Passive_BasicParasiteTree);
             activeTree = new ActiveTreeHandler(pawn, this, ProteanDefOf.Active_BasicParasiteTree);
+
+            EventManager.OnDamageDealt += EventManager_OnDamageDealt;
+            EventManager.OnDamageTaken += EventManager_OnDamageTaken;
+
+            SetSuitColor(Color.red);
+        }
+
+        private void EventManager_OnDamageTaken(Pawn arg1, DamageInfo arg2)
+        {
+            Log.Message($"{arg1.Label} took {arg2.Amount} damage");
+        }
+
+
+        private Color _SuitColor;
+        public Color SuitColor => _SuitColor;
+
+        public void SetSuitColor(Color newColor)
+        {
+            _SuitColor = newColor;
+        }
+
+        public override void PostRemove()
+        {
+            EventManager.OnDamageTaken -= EventManager_OnDamageTaken;
+            EventManager.OnDamageDealt -= EventManager_OnDamageDealt;
+            base.PostRemove();
+        }
+
+        private DamageWorker.DamageResult EventManager_OnDamageDealt(Thing victim, Thing target, DamageInfo arg2, DamageWorker.DamageResult damageResult)
+        {
+            damageResult.totalDamageDealt += 1000f;
+
+
+            Log.Message($"{target.Label} dealt {arg2.Amount} damage to {victim.Label}");
+            return damageResult;
         }
 
         public override void Tick()
@@ -59,7 +95,7 @@ namespace Protean
             Find.WindowStack.Add(window);
         }
 
-        private void IncreaseBond(float amount)
+        public void IncreaseBond(float amount)
         {
             if (bondLevel >= MaxBondLevel) return;
             currentBond += amount;
@@ -84,7 +120,7 @@ namespace Protean
             }
         }
 
-        private void GainBondLevel(int levels)
+        public void GainBondLevel(int levels)
         {
             int oldLevel = bondLevel;
             int gainedLevels = levels;
@@ -102,12 +138,12 @@ namespace Protean
             return HasTalentPointsAvailable(upgrade.pointCost);
         }
 
-        private bool HasTalentPointsAvailable(int amount)
+        public bool HasTalentPointsAvailable(int amount)
         {
             return talentPoints >= amount;
         }
 
-        private void UseTalentPoints(int amount)
+        public void UseTalentPoints(int amount)
         {
             if (HasTalentPointsAvailable(amount))
             {

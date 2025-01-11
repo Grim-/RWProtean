@@ -5,6 +5,9 @@
     <label>Protean_BasicGene</label>
     <description>Protean_BasicGene</description>
     <geneClass>Protean.Gene_Parasite</geneClass>
+    <abilities>
+      <li>Protean_ToggleSuit</li>
+    </abilities>
   </GeneDef>
 
 </Defs>

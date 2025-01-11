@@ -1,39 +1,99 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-<!--   <Protean.UpgradePathDef>
-    <defName>ParasitePath</defName>
-    <pathDescription>11111111</pathDescription>
-    <exclusiveWith>
-      <li>SymbiosisPath</li>
-    </exclusiveWith>
-  </Protean.UpgradePathDef>
 
-  Parasite Path
-  <Protean.UpgradeTreeNodeDef>
-    <defName>ParasitePathNode1</defName>
-    <type>Normal</type>
-    <upgrade>ExtraOrganUpgrade</upgrade>
-    <path>ParasitePath</path>
-    <connections>
-      <li>ParasitePathNode2</li>
-    </connections>
-  </Protean.UpgradeTreeNodeDef>
+    <!-- Parasite Paths -->
+    <Protean.UpgradePathDef>
+      <defName>ParasitePath</defName>
+      <pathDescription>11111111</pathDescription>
+      <exclusiveWith>
+        <li>SymbiosisPath</li>
+      </exclusiveWith>
+    </Protean.UpgradePathDef>
 
-  <Protean.UpgradeTreeNodeDef>
-    <defName>ParasitePathNode2</defName>
-    <type>Normal</type>
-    <upgrade>BoneReinforcementUpgrade</upgrade>
-    <path>ParasitePath</path>
-    <connections>
-      <li>ParasitePathNode3</li>
-    </connections>
-  </Protean.UpgradeTreeNodeDef>
 
-  <Protean.UpgradeTreeNodeDef>
-    <defName>ParasitePathNode3</defName>
-    <type>Normal</type>
-    <upgrade>SensoryEnhancementUpgrade</upgrade>
-    <path>ParasitePath</path>
-  </Protean.UpgradeTreeNodeDef> -->
+    <Protean.UpgradePathDef>
+      <defName>ParasitePath1_A</defName>
+      <pathDescription>Cardiovascular Enhancement Path A</pathDescription>
+      <exclusiveWith>
+        <li>ParasitePath1_B</li>
+      </exclusiveWith>
+    </Protean.UpgradePathDef>
+
+    <Protean.UpgradePathDef>
+      <defName>ParasitePath1_B</defName>
+      <pathDescription>Cardiovascular Enhancement Path B</pathDescription>
+      <exclusiveWith>
+        <li>ParasitePath1_A</li>
+      </exclusiveWith>
+    </Protean.UpgradePathDef>
+
+    <Protean.UpgradeTreeNodeDef>
+      <defName>ParasitePathNode1</defName>
+      <position>(14,12)</position>
+      <type>Normal</type>
+      <upgrades>
+        <li>ExtraOrganUpgrade</li>
+      </upgrades>
+      <path>ParasitePath</path>
+      <connections>
+        <li>ParasitePathNode2</li>
+      </connections>
+    </Protean.UpgradeTreeNodeDef>
+
+    <Protean.UpgradeTreeNodeDef>
+      <defName>ParasitePathNode2</defName>
+      <position>(14,9)</position>
+      <type>Normal</type>
+      <upgrades>
+        <li>BoneReinforcementUpgrade</li>
+      </upgrades>
+      <path>ParasitePath</path>
+      <connections>
+        <li>ParasitePathNode3</li>
+      </connections>
+    </Protean.UpgradeTreeNodeDef>
+
+    <Protean.UpgradeTreeNodeDef>
+      <defName>ParasitePathNode3</defName>
+      <position>(14,5)</position>
+      <type>Branch</type>
+      <upgrades>
+        <li>SensoryEnhancementUpgrade</li>
+      </upgrades>
+      <path>ParasitePath</path>
+      <connections>
+        <li>node_1733542189621</li>
+      </connections>
+      <branchPaths>
+        <li>
+          <path>ParasitePath1_A</path>
+          <nodes>
+          </nodes>
+        </li>
+      </branchPaths>
+    </Protean.UpgradeTreeNodeDef>
+
+    <Protean.UpgradeTreeNodeDef>
+      <defName>node_1733542110731</defName>
+      <position>(16,1)</position>
+      <type>Normal</type>
+      <upgrades>
+        <li>SensoryEnhancementUpgrade</li>
+      </upgrades>
+      <path>ParasitePath1_A</path>
+    </Protean.UpgradeTreeNodeDef>
+
+    <Protean.UpgradeTreeNodeDef>
+      <defName>node_1733542189621</defName>
+      <position>(11,1)</position>
+      <type>Normal</type>
+      <upgrades>
+        <li>SensoryEnhancementUpgrade</li>
+      </upgrades>
+      <path>ParasitePath1_B</path>
+    </Protean.UpgradeTreeNodeDef>
+
+
+
 
 </Defs>

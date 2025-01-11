@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <!-- Symbiotic Consciousness -->
+       <Protean.UpgradeDef>
+           <defName>SymbioticConsciousnessUpgrade</defName>
+           <label>Symbiotic Consciousness</label>
+                 <uiIconPath>DragonBall1</uiIconPath>
+           <description>Achieves a deeper neural connection between host and parasite, enabling shared processing power and enhanced mental capabilities.</description>
+           <parasiteLevelRequired>5</parasiteLevelRequired>
+           <hediffEffects>
+               <li>
+                   <hediffDef>SymbioticConsciousness</hediffDef>
+               </li>
+           </hediffEffects>
+           <abilityEffects>
+               <li>
+                 <abilities>
+                   <li>
+                     <abilityDef>SymbioticFocus</abilityDef>
+                    </li>
+                 </abilities>
+               </li>
+           </abilityEffects>
+       </Protean.UpgradeDef>
+
+       <HediffDef>
+           <defName>SymbioticConsciousness</defName>
+           <label>symbiotic consciousness</label>
+           <description>Mind and parasite work in perfect harmony, enhancing mental capabilities.</description>
+           <defaultLabelColor>(0.7, 0.5, 0.8)</defaultLabelColor>
+           <isBad>false</isBad>
+           <stages>
+               <li>
+                   <statOffsets>
+                       <ResearchSpeed>0.25</ResearchSpeed>
+                       <GlobalLearningFactor>0.15</GlobalLearningFactor>
+                       <MentalBreakThreshold>-0.10</MentalBreakThreshold>
+                   </statOffsets>
+               </li>
+           </stages>
+       </HediffDef>
+
+       <AbilityDef>
+           <defName>SymbioticFocus</defName>
+           <label>symbiotic focus</label>
+           <description>Channel the shared consciousness to achieve a state of perfect focus and clarity.</description>
+           <iconPath>Abilities/SymbioticFocus</iconPath>
+           <statBases>
+               <Cooldown>1200</Cooldown>
+           </statBases>
+           <targetRequired>False</targetRequired>
+           <verbProperties>
+               <verbClass>Verb_CastAbility</verbClass>
+               <drawTime>150</drawTime>
+           </verbProperties>
+           <comps>
+               <li Class="CompProperties_AbilityGiveHediff">
+                   <compClass>CompAbilityEffect_GiveHediff</compClass>
+                   <hediffDef>SymbioticFocusState</hediffDef>
+                   <duration>30</duration>
+               </li>
+           </comps>
+       </AbilityDef>
+
+       <HediffDef>
+           <defName>SymbioticFocusState</defName>
+           <label>symbiotic focus</label>
+           <description>In a state of perfect harmony with the parasite, achieving extraordinary mental clarity.</description>
+           <defaultLabelColor>(0.7, 0.5, 0.8)</defaultLabelColor>
+           <isBad>false</isBad>
+           <stages>
+               <li>
+                   <statOffsets>
+                       <WorkSpeedGlobal>0.50</WorkSpeedGlobal>
+                       <MentalBreakThreshold>-1.0</MentalBreakThreshold>
+                   </statOffsets>
+                   <capMods>
+                       <li>
+                           <capacity>Consciousness</capacity>
+                           <offset>0.25</offset>
+                       </li>
+                   </capMods>
+               </li>
+           </stages>
+       </HediffDef>
+</Defs>

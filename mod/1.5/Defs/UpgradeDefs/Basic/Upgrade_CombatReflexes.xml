@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Defs>
+<!-- Combat Reflexes -->
+<Protean.UpgradeDef>
+    <defName>CombatReflexesUpgrade</defName>
+    <label>Combat Reflexes</label>
+          <uiIconPath>DragonBall1</uiIconPath>
+    <description>Grants enhanced combat abilities through parasitic nervous system modifications.</description>
+    <parasiteLevelRequired>3</parasiteLevelRequired>
+    <abilityEffects>
+        <li>
+          <abilities>
+            <li>
+              <abilityDef>ParasiticDodge</abilityDef>
+             </li>
+          </abilities>
+        </li>
+    </abilityEffects>
+</Protean.UpgradeDef>
+
+<AbilityDef>
+    <defName>ParasiticDodge</defName>
+    <label>parasitic dodge</label>
+    <description>Temporarily boosts dodge chance through enhanced reflexes.</description>
+    <iconPath>Abilities/ParasiticDodge</iconPath>
+    <statBases>
+        <Cooldown>300</Cooldown>
+    </statBases>
+    <targetRequired>False</targetRequired>
+    <verbProperties>
+        <verbClass>Verb_CastAbility</verbClass>
+        <drawTime>150</drawTime>
+    </verbProperties>
+    <comps>
+        <li Class="CompProperties_AbilityGiveHediff">
+            <compClass>CompAbilityEffect_GiveHediff</compClass>
+            <hediffDef>ParasiticDodgeBoost</hediffDef>
+            <duration>15</duration>
+        </li>
+    </comps>
+</AbilityDef>
+
+  <HediffDef>
+      <defName>ParasiticDodgeBoost</defName>
+      <label>enhanced reflexes</label>
+      <description>Reflexes temporarily enhanced by parasitic nervous system boost.</description>
+      <defaultLabelColor>(0.5, 0.8, 0.5)</defaultLabelColor>
+      <isBad>false</isBad>
+      <stages>
+          <li>
+              <statOffsets>
+                  <MeleeDodgeChance>15.0</MeleeDodgeChance>
+              </statOffsets>
+          </li>
+      </stages>
+  </HediffDef>
+
+</Defs>
