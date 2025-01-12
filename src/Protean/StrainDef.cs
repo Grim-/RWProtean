@@ -20,6 +20,7 @@ namespace Protean
     {
         private static int currentPage = 0;
         private static int itemsPerPage = 8;
+        public static float ButtonSize = 30;
 
         static GizmoGridPager()
         {
@@ -199,7 +200,7 @@ namespace Protean
         {
             if (__instance is Command_Ability)
             {
-                __result = 40f;
+                __result = GizmoGridPager.ButtonSize;
             }
         }
     }
