@@ -60,7 +60,7 @@ namespace Protean
             {
                 allGizmos.Add(new Command_Action
                 {
-                    defaultLabel = "◄",
+                    defaultLabel = $"◄ {currentPage}",
                     defaultDesc = "Previous page",
                     action = () => currentPage--,
                     Order = -1000,
@@ -80,7 +80,7 @@ namespace Protean
             {
                 allGizmos.Add(new Command_Action
                 {
-                    defaultLabel = "►",
+                    defaultLabel = $"► {currentPage}",
                     defaultDesc = "Next page",
                     action = () => currentPage++,
                     Order = 1000,
@@ -91,61 +91,6 @@ namespace Protean
             gizmos = allGizmos;
             return true;
         }
-        //public static bool GizmoGridPatchPrefix(ref IEnumerable<Gizmo> gizmos, float startX, out Gizmo mouseoverGizmo,
-        //    Func<Gizmo, bool> customActivatorFunc, Func<Gizmo, bool> highlightFunc, Func<Gizmo, bool> lowlightFunc, bool multipleSelected)
-        //{
-        //    mouseoverGizmo = null;
-        //    //just run original for layout events
-        //    if (Event.current.type == EventType.Layout)
-        //        return true;
-
-        //    var gizmoList = gizmos.ToList();
-        //    if (gizmoList.Count <= itemsPerPage)
-        //    {
-        //        currentPage = 0;
-        //        return true;
-        //    }
-
-        //    int totalPages = (int)Math.Ceiling(gizmoList.Count / (float)itemsPerPage);
-        //    currentPage = Math.Min(currentPage, totalPages - 1);
-
-
-        //    var allGizmos = new List<Gizmo>();
-
-        //    if (currentPage > 0)
-        //    {
-        //        allGizmos.Add(new Command_Action
-        //        {
-        //            defaultLabel = "◄",
-        //            defaultDesc = "Previous page",
-        //            action = () => currentPage--,
-        //            Order = -1000,
-        //            icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect")
-        //        });
-        //    }
-
-
-        //    allGizmos.AddRange(gizmoList
-        //        .Skip(currentPage * itemsPerPage)
-        //        .Take(itemsPerPage));
-
-
-        //    if (currentPage < totalPages - 1)
-        //    {
-        //        allGizmos.Add(new Command_Action
-        //        {
-        //            defaultLabel = "►",
-        //            defaultDesc = "Next page",
-        //            action = () => currentPage++,
-        //            Order = 1000,
-        //            icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect")
-        //        });
-        //    }
-
-        //    gizmos = allGizmos;
-
-        //    return true;
-        //}
 
         public static void Reset()
         {
@@ -163,10 +108,14 @@ namespace Protean
             if (!(command is Command_Ability abilityCommand))
                 return false;
 
-            if (abilityCommand.Pawn?.Faction != Faction.OfPlayer)
+            var pawn = abilityCommand.Pawn;
+            if (pawn?.Faction != Faction.OfPlayer)
+            {
+                ClearPawn(pawn.ThingID);
                 return false;
+            }
 
-            string pawnId = abilityCommand.Pawn.ThingID;
+            string pawnId = pawn.ThingID;
             if (!stickyAbilities.TryGetValue(pawnId, out var stickySet))
                 return false;
 
@@ -203,7 +152,6 @@ namespace Protean
             }
         }
 
-        // Call this when a pawn dies or is removed
         public static void ClearPawn(string pawnId)
         {
             stickyAbilities.Remove(pawnId);
@@ -225,7 +173,7 @@ namespace Protean
             if (Widgets.ButtonInvisible(checkboxRect))
             {
                 bool isSticky = __instance.IsSticky();
-                __instance.SetSticky(!isSticky); // Toggle the state
+                __instance.SetSticky(!isSticky);
                 Event.current.Use();
             }
         }
@@ -243,4 +191,27 @@ namespace Protean
             Widgets.Checkbox(checkboxRect.position, ref isSticky, 24f, false);
         }
     }
+    [HarmonyPatch(typeof(Command))]
+    [HarmonyPatch("get_GetShrunkSize")] 
+    public class Command_ShrinkPatch
+    {
+        static void Postfix(Command __instance, ref float __result)
+        {
+            if (__instance is Command_Ability)
+            {
+                __result = 40f;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Command_Ability))]
+    [HarmonyPatch(MethodType.Constructor, new[] { typeof(Ability), typeof(Pawn) })]
+    public class Command_ShrinkablePatch
+    {
+        static void Postfix(Command_Ability __instance)
+        {
+            __instance.shrinkable = true;
+        }
+    }
+
 }
