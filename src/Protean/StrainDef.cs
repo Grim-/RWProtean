@@ -22,6 +22,9 @@ namespace Protean
         private static int itemsPerPage = 8;
         public static float ButtonSize = 30;
 
+        private static Texture2D ArrowLeft => ContentFinder<Texture2D>.Get("ArrowLeft");
+        private static Texture2D ArrowRight => ContentFinder<Texture2D>.Get("ArrowRight");
+
         static GizmoGridPager()
         {
             var harmony = new Harmony("test.mod.pageableabilitygizmogrid");
@@ -31,7 +34,7 @@ namespace Protean
             );
         }
         public static bool GizmoGridPatchPrefix(ref IEnumerable<Gizmo> gizmos, float startX, out Gizmo mouseoverGizmo,
-    Func<Gizmo, bool> customActivatorFunc, Func<Gizmo, bool> highlightFunc, Func<Gizmo, bool> lowlightFunc, bool multipleSelected)
+            Func<Gizmo, bool> customActivatorFunc, Func<Gizmo, bool> highlightFunc, Func<Gizmo, bool> lowlightFunc, bool multipleSelected)
         {
             mouseoverGizmo = null;
             if (Event.current.type == EventType.Layout)
@@ -39,10 +42,15 @@ namespace Protean
 
             var gizmoList = gizmos.ToList();
 
+            var stickyGizmos = gizmoList
+                .Where(g => g is Command_Ability cmd && cmd.IsSticky())
+                .OrderBy(g => gizmoList.IndexOf(g))
+                .ToList();
 
-            var stickyGizmos = gizmoList.Where(g => g is Command_Ability cmd && cmd.IsSticky()).ToList();
-            var normalGizmos = gizmoList.Where(g => !(g is Command_Ability cmd && cmd.IsSticky())).ToList();
 
+            var normalGizmos = gizmoList
+                .Where(g => !(g is Command_Ability cmd && cmd.IsSticky()))
+                .ToList();
 
             if (normalGizmos.Count <= itemsPerPage)
             {
@@ -56,7 +64,7 @@ namespace Protean
 
             var allGizmos = new List<Gizmo>();
 
-            // Add nav buttons and sticky gizmos at start
+
             if (currentPage > 0)
             {
                 allGizmos.Add(new Command_Action
@@ -65,7 +73,7 @@ namespace Protean
                     defaultDesc = "Previous page",
                     action = () => currentPage--,
                     Order = -1000,
-                    icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect")
+                    icon = ArrowLeft
                 });
             }
 
@@ -85,14 +93,13 @@ namespace Protean
                     defaultDesc = "Next page",
                     action = () => currentPage++,
                     Order = 1000,
-                    icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect")
+                    icon = ArrowRight
                 });
             }
 
             gizmos = allGizmos;
             return true;
         }
-
         public static void Reset()
         {
             currentPage = 0;
