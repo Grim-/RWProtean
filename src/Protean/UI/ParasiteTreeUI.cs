@@ -61,7 +61,7 @@ namespace Protean
         private void DrawBackground(Rect inRect)
         {
             GUI.color = Color.white;
-            GUI.DrawTexture(inRect, skin.BackgroundTexture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(inRect, skin.BackgroundTexture, ScaleMode.ScaleToFit);
         }
 
         private void DrawNodes()

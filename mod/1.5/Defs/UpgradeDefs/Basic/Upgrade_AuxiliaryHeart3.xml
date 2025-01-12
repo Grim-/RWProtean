@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <Protean.UpgradeDef>
+  <Talented.UpgradeDef>
       <defName>AuxiliaryHeartUpgrade3</defName>
       <label>Superior Auxiliary Heart</label>
             <uiIconPath>DragonBall1</uiIconPath>
@@ -11,9 +11,9 @@
               <hediffDef>SuperiorAuxiliaryHeart</hediffDef>
           </li>
       </hediffEffects>
-  </Protean.UpgradeDef>
+  </Talented.UpgradeDef>
 
-  <HediffDef ParentName="AddedBodyPartBase">
+  <HediffDef ParentName="ImplantHediffBase">
       <defName>SuperiorAuxiliaryHeart</defName>
       <label>superior auxiliary heart</label>
       <description>The auxiliary heart has achieved perfect symbiosis with parasitic tissue.</description>

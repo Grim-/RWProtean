@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
     <!-- Auxiliary Heart -->
-    <Protean.UpgradeDef>
+    <Talented.UpgradeDef>
         <defName>AuxiliaryHeartUpgrade</defName>
         <label>Auxiliary Heart</label>
               <uiIconPath>DragonBall1</uiIconPath>
@@ -13,7 +13,7 @@
                 <isAddition>true</isAddition>
             </li>
         </organEffects>
-    </Protean.UpgradeDef>
+    </Talented.UpgradeDef>
 
     <HediffDef ParentName="ImplantHediffBase">
         <defName>AuxiliaryHeart</defName>

@@ -27,5 +27,10 @@
         <hediffDef>Protean_SuitActive</hediffDef>
       </li>
     </comps>
+    <modExtensions>
+      <li Class="Talented.XPExtension">
+        <xpGain>150</xpGain>
+      </li>
+    </modExtensions>
   </AbilityDef>
 </Defs>

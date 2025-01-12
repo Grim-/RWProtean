@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <Protean.UpgradeDef>
+  <Talented.UpgradeDef>
       <defName>BasicMetabolismUpgrade</defName>
       <label>Basic Metabolism</label>
       <description>Unlocks basic metabolic enhancements, improving eating and rest efficiency.</description>
@@ -11,7 +11,7 @@
               <hediffDef>ParasiteMetabolicBoost</hediffDef>
           </li>
       </hediffEffects>
-  </Protean.UpgradeDef>
+  </Talented.UpgradeDef>
 
   <HediffDef>
     <defName>ParasiteMetabolicBoost</defName>

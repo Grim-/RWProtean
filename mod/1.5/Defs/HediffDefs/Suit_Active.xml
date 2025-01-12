@@ -37,7 +37,6 @@
           <graphicClass>Graphic_Multi</graphicClass>
           <drawSize>1.1</drawSize>
           <shaderParameters>
-            <_AlphaMask>/Things/Riika/RikaBodymask</_AlphaMask>
             <_Clipping>0.5</_Clipping>
           </shaderParameters>
         </graphicData>
@@ -80,28 +79,6 @@
       <key>Root</key>
       <value>
         <workerClass>Protean.AnimationWorker_SymbiotePulse</workerClass>
-        <keyframes>
-          <li>
-            <tick>0</tick>
-            <scale>(1.0, 1.0, 1.0)</scale>
-          </li>
-          <li>
-            <tick>30</tick>
-            <scale>(1.05, 1.0, 1.05)</scale>
-          </li>
-          <li>
-            <tick>60</tick>
-            <scale>(1.0, 1.0, 1.0)</scale>
-          </li>
-          <li>
-            <tick>90</tick>
-            <scale>(0.95, 1.0, 0.95)</scale>
-          </li>
-          <li>
-            <tick>120</tick>
-            <scale>(1.0, 1.0, 1.0)</scale>
-          </li>
-        </keyframes>
       </value>
     </li>
   </animationParts>

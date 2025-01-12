@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<Defs>
-  <Protean.TreeDisplayStrategyDef>
-    <defName>VerticalStrategy</defName>
-    <strategyClass>Protean.VerticalTreeStrategy</strategyClass>
-  </Protean.TreeDisplayStrategyDef>
-
-</Defs>

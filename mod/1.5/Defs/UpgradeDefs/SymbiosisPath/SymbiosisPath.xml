@@ -2,36 +2,37 @@
 <Defs>
 
   <!-- Symbiosis Paths -->
-  <Protean.UpgradePathDef>
+  <Talented.UpgradePathDef>
     <defName>SymbiosisPath</defName>
     <pathDescription>22222222</pathDescription>
     <exclusiveWith>
       <li>ParasitePath</li>
     </exclusiveWith>
-  </Protean.UpgradePathDef>
+  </Talented.UpgradePathDef>
 
-  <Protean.UpgradePathDef>
+  <Talented.UpgradePathDef>
     <defName>SymbiosisPathBranch1_A</defName>
     <pathDescription>Auxiliary Heart specialization</pathDescription>
     <exclusiveWith>
       <li>SymbiosisPathBranch1_B</li>
     </exclusiveWith>
-  </Protean.UpgradePathDef>
+  </Talented.UpgradePathDef>
 
-  <Protean.UpgradePathDef>
+  <Talented.UpgradePathDef>
     <defName>SymbiosisPathBranch1_B</defName>
     <pathDescription>Symbiotic Consciousness specialization</pathDescription>
     <exclusiveWith>
       <li>SymbiosisPathBranch1_A</li>
     </exclusiveWith>
-  </Protean.UpgradePathDef>
+  </Talented.UpgradePathDef>
 
 
 
-  <Protean.UpgradeTreeNodeDef>
+  <Talented.UpgradeTreeNodeDef>
     <defName>SymbiosisPathNode1</defName>
     <position>(23,12)</position>
     <type>Branch</type>
+    <sequential>true</sequential>
     <upgrades>
       <li>SensoryEnhancementUpgrade</li>
       <li>CombatReflexesUpgrade</li>
@@ -56,9 +57,9 @@
         </nodes>
       </li>
     </branchPaths>
-  </Protean.UpgradeTreeNodeDef>
+  </Talented.UpgradeTreeNodeDef>
 
-  <Protean.UpgradeTreeNodeDef>
+  <Talented.UpgradeTreeNodeDef>
     <defName>SymbiosisPathNode2</defName>
     <position>(26,8)</position>
     <type>Normal</type>
@@ -73,9 +74,9 @@
     <prerequisitesToShow>
       <li>SensoryEnhancementUpgrade</li>
     </prerequisitesToShow>
-  </Protean.UpgradeTreeNodeDef>
+  </Talented.UpgradeTreeNodeDef>
 
-  <Protean.UpgradeTreeNodeDef>
+  <Talented.UpgradeTreeNodeDef>
     <defName>node_1733542050780</defName>
     <position>(26,5)</position>
     <type>Normal</type>
@@ -86,9 +87,9 @@
     <connections>
       <li>node_1733542077413</li>
     </connections>
-  </Protean.UpgradeTreeNodeDef>
+  </Talented.UpgradeTreeNodeDef>
 
-  <Protean.UpgradeTreeNodeDef>
+  <Talented.UpgradeTreeNodeDef>
     <defName>node_1733542077413</defName>
     <position>(26,1)</position>
     <type>Normal</type>
@@ -96,10 +97,10 @@
       <li>AuxiliaryHeartUpgrade3</li>
     </upgrades>
     <path>SymbiosisPathBranch1_A</path>
-  </Protean.UpgradeTreeNodeDef>
+  </Talented.UpgradeTreeNodeDef>
 
 
-  <Protean.UpgradeTreeNodeDef>
+  <Talented.UpgradeTreeNodeDef>
     <defName>SymbiosisPathNode3</defName>
     <position>(21,8)</position>
     <type>Normal</type>
@@ -107,6 +108,6 @@
       <li>SymbioticConsciousnessUpgrade</li>
     </upgrades>
     <path>SymbiosisPathBranch1_B</path>
-  </Protean.UpgradeTreeNodeDef>
+  </Talented.UpgradeTreeNodeDef>
 
 </Defs>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <!-- Enhanced Sensory Processing -->
-  <Protean.UpgradeDef>
+  <Talented.UpgradeDef>
       <defName>SensoryEnhancementUpgrade</defName>
       <label>Sensory Enhancement</label>
             <uiIconPath>SkullIcon</uiIconPath>
@@ -12,7 +12,7 @@
               <hediffDef>ParasiteSensoryBoost</hediffDef>
           </li>
       </hediffEffects>
-  </Protean.UpgradeDef>
+  </Talented.UpgradeDef>
 
   <HediffDef>
       <defName>ParasiteSensoryBoost</defName>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
     <!-- Symbiotic Consciousness -->
-       <Protean.UpgradeDef>
+       <Talented.UpgradeDef>
            <defName>SymbioticConsciousnessUpgrade</defName>
            <label>Symbiotic Consciousness</label>
                  <uiIconPath>DragonBall1</uiIconPath>
@@ -21,7 +21,7 @@
                  </abilities>
                </li>
            </abilityEffects>
-       </Protean.UpgradeDef>
+       </Talented.UpgradeDef>
 
        <HediffDef>
            <defName>SymbioticConsciousness</defName>
@@ -51,13 +51,11 @@
            <targetRequired>False</targetRequired>
            <verbProperties>
                <verbClass>Verb_CastAbility</verbClass>
-               <drawTime>150</drawTime>
            </verbProperties>
            <comps>
                <li Class="CompProperties_AbilityGiveHediff">
                    <compClass>CompAbilityEffect_GiveHediff</compClass>
                    <hediffDef>SymbioticFocusState</hediffDef>
-                   <duration>30</duration>
                </li>
            </comps>
        </AbilityDef>

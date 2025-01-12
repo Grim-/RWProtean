@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
     <!-- The upgrade definition -->
-    <Protean.UpgradeDef>
+    <Talented.UpgradeDef>
         <defName>ProteanBladeArmsUpgrade</defName>
         <label>Protean Blade Arms</label>
         <description>Allows the parasite to rapidly transform the host's arms into deadly blade appendages.</description>
@@ -15,7 +15,7 @@
               </abilities>
             </li>
         </abilityEffects>
-    </Protean.UpgradeDef>
+    </Talented.UpgradeDef>
 
     <!-- The ability definition -->
     <AbilityDef>
@@ -38,7 +38,7 @@
     </AbilityDef>
 
     <!-- The hediff definition -->
-    <HediffDef ParentName="AddedBodyPartBase">
+    <HediffDef ParentName="ImplantHediffBase">
         <defName>ProteanBladeArms</defName>
         <label>protean blade arms</label>
         <description>Arms transformed into deadly protean blades through parasitic manipulation. The tissue constantly shifts and reforms, maintaining razor-sharp edges.</description>

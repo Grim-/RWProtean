@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-    <Protean.UpgradeTreeNodeDef>
+    <Talented.UpgradeTreeNodeDef>
       <defName>ParasiteBasicMetabolism</defName>
       <type>Start</type>
       <upgrades>
@@ -10,6 +10,6 @@
         <li>ParasitePathNode1</li>
         <li>SymbiosisPathNode1</li>
       </connections>
-    </Protean.UpgradeTreeNodeDef>
+    </Talented.UpgradeTreeNodeDef>
 
 </Defs>

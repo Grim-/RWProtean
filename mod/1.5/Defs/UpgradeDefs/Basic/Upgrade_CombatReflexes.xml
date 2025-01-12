@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Defs>
 <!-- Combat Reflexes -->
-<Protean.UpgradeDef>
+<Talented.UpgradeDef>
     <defName>CombatReflexesUpgrade</defName>
     <label>Combat Reflexes</label>
           <uiIconPath>DragonBall1</uiIconPath>
@@ -16,26 +16,21 @@
           </abilities>
         </li>
     </abilityEffects>
-</Protean.UpgradeDef>
+</Talented.UpgradeDef>
 
 <AbilityDef>
     <defName>ParasiticDodge</defName>
     <label>parasitic dodge</label>
     <description>Temporarily boosts dodge chance through enhanced reflexes.</description>
     <iconPath>Abilities/ParasiticDodge</iconPath>
-    <statBases>
-        <Cooldown>300</Cooldown>
-    </statBases>
     <targetRequired>False</targetRequired>
     <verbProperties>
         <verbClass>Verb_CastAbility</verbClass>
-        <drawTime>150</drawTime>
     </verbProperties>
     <comps>
         <li Class="CompProperties_AbilityGiveHediff">
             <compClass>CompAbilityEffect_GiveHediff</compClass>
             <hediffDef>ParasiticDodgeBoost</hediffDef>
-            <duration>15</duration>
         </li>
     </comps>
 </AbilityDef>

@@ -1,13 +1,52 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <GeneDef>
+  <Talented.TalentedGeneDef>
     <defName>Protean_BasicGene</defName>
     <label>Protean_BasicGene</label>
     <description>Protean_BasicGene</description>
     <geneClass>Protean.Gene_Parasite</geneClass>
+    <resourceGizmoThresholds>
+      <li>0.25</li>
+      <li>0.5</li>
+      <li>0.75</li>
+    </resourceGizmoThresholds>
+    <barColor>(3, 3, 138)</barColor>
     <abilities>
       <li>Protean_ToggleSuit</li>
     </abilities>
-  </GeneDef>
+    <MainTreeDef>Active_BasicParasiteTree</MainTreeDef>
+    <SecondaryTreeDef>Passive_BasicParasiteTree</SecondaryTreeDef>
+    <experienceFormula>Basic_LinearXP</experienceFormula>
+    <TabLabel>Talents</TabLabel>
+    <experienceGainSettings>
+      <experienceTypes>
+        <!-- Base damage XP -->
+        <li Class="Talented.DamageExperienceTypeDef">
+          <baseXP>10</baseXP>
+          <damageFactor>0.1</damageFactor>
+        </li>
+        <li Class="Talented.DamageExperienceTypeDef">
+          <baseXP>10</baseXP>
+          <damageFactor>0.1</damageFactor>
+        </li>
+        <!-- Skill specific -->
+        <li Class="Talented.SkillExperienceTypeDef">
+          <SkillDef>Shooting</SkillDef>
+          <baseXP>2</baseXP>
+        </li>
+        <!-- Job specific -->
+        <li Class="Talented.JobExperienceTypeDef">
+          <SkillDef>HaulToCell</SkillDef>
+          <baseXP>1</baseXP>
+        </li>
+        <!-- Verb specific -->
+        <li Class="Talented.VerbExperienceTypeDef">
+          <VerbClassName>Verb_BeatFire</VerbClassName>
+          <baseXP>1</baseXP>
+        </li>
+      </experienceTypes>
+    </experienceGainSettings>
+  </Talented.TalentedGeneDef>
+
 
 </Defs>

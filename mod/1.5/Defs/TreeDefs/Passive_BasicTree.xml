@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <!-- Tree Definition -->
-  <Protean.UpgradeTreeDef>
+  <Talented.UpgradeTreeDef>
     <defName>Passive_BasicParasiteTree</defName>
     <dimensions>(10,10)</dimensions>
     <nodes>
@@ -14,7 +14,8 @@
       <li>SymbiosisPathBranch1_B</li>
     </availablePaths>
     <displayStrategy>VerticalStrategy</displayStrategy>
-  </Protean.UpgradeTreeDef>
+    <talentPointFormula>Every5Levels</talentPointFormula>  
+  </Talented.UpgradeTreeDef>
 
 
 </Defs>
