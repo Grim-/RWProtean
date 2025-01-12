@@ -28,12 +28,33 @@ namespace Protean
 
         private Color _SuitColor;
         public Color SuitColor => _SuitColor;
+
+        private Color _EyeColor;
+        public Color EyeColor => _EyeColor;
+
+
+
+        private StrainDef ChosenStrain = null;
+
+
+        protected ParasiteGeneDef ParasiteGeneDef => (ParasiteGeneDef)def;
+
+
         private float MaxBondPerLevel(int level) => (level + 1) * BaseBond;
 
         public override void PostMake()
         {
             base.PostMake();
-            SetSuitColor(new Color(Rand.Range(0,1f), Rand.Range(0, 1f), Rand.Range(0,1f), 1f ));
+
+            if (ChosenStrain == null)
+            {
+                ChosenStrain = ParasiteGeneDef.SelectRandomStrain();
+            }
+
+            if (ChosenStrain != null)
+            {
+                SetSuitColor(ChosenStrain.possibleColors.RandomElementWithFallback());
+            }
         }
 
         public override void PostRemove()
@@ -41,10 +62,29 @@ namespace Protean
             base.PostRemove();
         }
 
+        protected override void InitializeTrees()
+        {
+            passiveTree = new PassiveTreeHandler(pawn, this, TalentedGeneDef.SecondaryTreeDef);
+            activeTree = new ActiveTreeHandler(pawn, this, TalentedGeneDef.MainTreeDef);
+        }
 
+        public override void OnExperienceGained(float amount, string source)
+        {
+
+        }
+
+        public override void OnLevelGained(int levels)
+        {
+
+        }
         public void SetSuitColor(Color newColor)
         {
             _SuitColor = newColor;
+        }
+
+        public void SetEyeColor(Color newColor)
+        {
+            _EyeColor = newColor;
         }
 
         public override void Tick()
@@ -126,28 +166,16 @@ namespace Protean
             Scribe_Deep.Look(ref passiveTree, "passiveTree");
             Scribe_Deep.Look(ref activeTree, "activeTree");
 
+            Scribe_Defs.Look(ref ChosenStrain, "chosenStrainDef");
+
             Scribe_Values.Look(ref currentLevel, "currentLevel", 1);
             Scribe_Values.Look(ref bondLevel, "bondLevel", 0);
             Scribe_Values.Look(ref currentBond, "currentBond", 0f);
             Scribe_Values.Look(ref talentPoints, "talentPoints", 0);
 
             Scribe_Values.Look(ref _SuitColor, "suitColor");
+            Scribe_Values.Look(ref _EyeColor, "eyeColor");
         }
 
-        protected override void InitializeTrees()
-        {
-            passiveTree = new PassiveTreeHandler(pawn, this, TalentedGeneDef.SecondaryTreeDef);
-            activeTree = new ActiveTreeHandler(pawn, this, TalentedGeneDef.MainTreeDef);
-        }
-
-        public override void OnExperienceGained(float amount, string source)
-        {
-          
-        }
-
-        public override void OnLevelGained(int levels)
-        {
-           
-        }
     }
 }

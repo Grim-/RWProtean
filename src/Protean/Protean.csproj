@@ -90,10 +90,13 @@
     <Compile Include="CompProperties_ToggleHediff.cs" />
     <Compile Include="Gene\BasicResourceGeneDef.cs" />
     <Compile Include="Gene\Gene_BasicResource.cs" />
+    <Compile Include="GraphicsPatches.cs" />
+    <Compile Include="ParasiteGeneDef.cs" />
     <Compile Include="PawnOverlayNode.cs" />
     <Compile Include="PawnOverlayNodeProperties.cs" />
     <Compile Include="PawnOverlayNodeWorker.cs" />
     <Compile Include="Gene_Parasite.cs" />
+    <Compile Include="StrainDef.cs" />
     <Compile Include="UI\ParasiteTreeUI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProteanDefOf.cs" />

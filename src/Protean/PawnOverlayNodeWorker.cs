@@ -48,13 +48,17 @@ namespace Protean
             if (overlayNode == null) return matPropBlock;
 
             Gene_Parasite parasite = parms.pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
-            Color color = (parasite != null && parasite.SuitColor != default(Color))
+            Color suitColor = (parasite != null && parasite.SuitColor != default(Color))
                 ? parasite.SuitColor
                 : overlayNode.Props.overlayColor;
 
-            color.a = overlayNode.Props.overlayAlpha;
-            matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * color);
+            Color eyeColor = (parasite != null && parasite.EyeColor != default(Color))
+             ? parasite.EyeColor
+             : Color.white;
 
+            suitColor.a = overlayNode.Props.overlayAlpha;
+            matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * suitColor);
+            matPropBlock.SetColor(ShaderPropertyIDs.ColorTwo, parms.tint * eyeColor);
             return matPropBlock;
         }
 
@@ -83,20 +87,20 @@ namespace Protean
 
         public override Vector3 ScaleFor(PawnRenderNode node, PawnDrawParms parms)
         {
-            //if (node is PawnOverlayNode overlayNode && overlayNode.Props.graphicData != null)
-            //{
-            //    Vector2 baseSize = overlayNode.Props.graphicData.drawSize;
+            if (node is PawnOverlayNode overlayNode && overlayNode.Props.graphicData != null)
+            {
+                Vector2 baseSize = overlayNode.Props.graphicData.drawSize;
 
-            //    float pulseAmount = 0.05f;
-            //    float pulseSpeed = 1f;
-            //    float scaleFactor = 1f + (Mathf.Sin(Time.realtimeSinceStartup * pulseSpeed) * pulseAmount);
+                float pulseAmount = 0.05f;
+                float pulseSpeed = 1f;
+                float scaleFactor = 1.1f + (Mathf.Sin(Time.realtimeSinceStartup * pulseSpeed) * pulseAmount);
 
-            //    return new Vector3(
-            //        baseSize.x * scaleFactor,
-            //        1f, 
-            //        baseSize.y * scaleFactor
-            //    );
-            //}
+                return new Vector3(
+                    baseSize.x * scaleFactor,
+                    1f,
+                    baseSize.y * scaleFactor
+                );
+            }
             return base.ScaleFor(node, parms);
         }
 
