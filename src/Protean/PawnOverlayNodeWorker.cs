@@ -39,27 +39,77 @@ namespace Protean
             request.preDrawnComputedMatrix = Matrix4x4.TRS(drawLoc, quat, scale);
             requests.Add(request);
         }
+
+
+
+        protected int currentTicks = 0;
+        protected int colorShiftTicks = 300;
+        protected Color currentColor;
+        protected Color targetColor;
+
         public override MaterialPropertyBlock GetMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
         {
             var matPropBlock = base.GetMaterialPropertyBlock(node, material, parms);
-            if (matPropBlock == null) return null;
+            if (matPropBlock == null) 
+                return null;
 
             var overlayNode = node as PawnOverlayNode;
-            if (overlayNode == null) return matPropBlock;
+            if (overlayNode == null) 
+                return matPropBlock;
 
             Gene_Parasite parasite = parms.pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
-            Color suitColor = (parasite != null && parasite.SuitColor != default(Color))
+            if (parasite == null) 
+                return matPropBlock;
+
+            Color baseColor = (parasite != null && parasite.SuitColor != default(Color))
                 ? parasite.SuitColor
                 : overlayNode.Props.overlayColor;
 
             Color eyeColor = (parasite != null && parasite.EyeColor != default(Color))
-             ? parasite.EyeColor
-             : Color.white;
+                ? parasite.EyeColor
+                : Color.white;
 
-            suitColor.a = overlayNode.Props.overlayAlpha;
-            matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * suitColor);
+
+            currentTicks++;
+            if (currentTicks >= colorShiftTicks)
+            {
+                currentTicks = 0;
+                currentColor = targetColor;
+                targetColor = new Color(Rand.Range(0f, 1f), Rand.Range(0f, 1f), Rand.Range(0f, 1f));
+            }
+
+            float lerpAmount = (float)currentTicks / colorShiftTicks;
+            Color lerpedColor = Color.Lerp(currentColor, targetColor, lerpAmount);
+
+
+            //float pulseAmount = (Mathf.Sin(Find.TickManager.TicksGame / 60f) + 1f) * 0.2f;
+            //lerpedColor *= (1f + pulseAmount);
+
+
+
+            float healthPercent = parms.pawn.health.summaryHealth.SummaryHealthPercent;
+            lerpedColor.a = Mathf.Lerp(0.2f, 1f, healthPercent);
+
+
+            //lerpedColor.a = overlayNode.Props.overlayAlpha;
+            matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * lerpedColor);
             matPropBlock.SetColor(ShaderPropertyIDs.ColorTwo, parms.tint * eyeColor);
+
             return matPropBlock;
+        }
+
+        protected Color GetDirectionColorShift(Color lerpedColor, PawnDrawParms parms)
+        {
+            float directionMultiplier = parms.facing == Rot4.North ? 1.2f : 1f;
+            lerpedColor *= directionMultiplier;
+            return lerpedColor;
+        }
+
+        protected Color GetHealthColor(Color lerpedColor, PawnDrawParms parms)
+        {
+            float healthPercent = parms.pawn.health.summaryHealth.SummaryHealthPercent;
+            lerpedColor *= Mathf.Lerp(0.5f, 1.2f, healthPercent);
+            return lerpedColor;
         }
 
         public override Vector3 OffsetFor(PawnRenderNode node, PawnDrawParms parms, out Vector3 pivot)
@@ -119,18 +169,5 @@ namespace Protean
         {
             return base.RotationFor(node, parms);
         }
-    }
-
-    public class HediffCompProperties_SuitToggle : HediffCompProperties
-    {
-        public HediffCompProperties_SuitToggle()
-        {
-            compClass = typeof(HediffComp_SuitToggle);
-        }
-    }
-
-    public class HediffComp_SuitToggle : HediffComp
-    {
-
     }
 }

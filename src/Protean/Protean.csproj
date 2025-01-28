@@ -48,7 +48,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Talented">
-      <HintPath>D:\Games\RimWorld\Mods\Talented\1.5\Assemblies\Talented.dll</HintPath>
+      <HintPath>D:\Games\RimWorld\Mods\3412307423\1.5\Assemblies\Talented.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
@@ -91,6 +91,7 @@
     <Compile Include="Gene\BasicResourceGeneDef.cs" />
     <Compile Include="Gene\Gene_BasicResource.cs" />
     <Compile Include="GraphicsPatches.cs" />
+    <Compile Include="HediffCompProperties_SuitToggle.cs" />
     <Compile Include="ParasiteGeneDef.cs" />
     <Compile Include="PawnOverlayNode.cs" />
     <Compile Include="PawnOverlayNodeProperties.cs" />

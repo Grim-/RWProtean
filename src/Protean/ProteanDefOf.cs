@@ -7,8 +7,8 @@ namespace Protean
     public class ProteanDefOf
     {
         public static Talented.TalentedGeneDef Protean_BasicGene;
-        public static Talented.UpgradeTreeDef Active_BasicParasiteTree;
-        public static Talented.UpgradeTreeDef Passive_BasicParasiteTree;
+        public static Talented.TalentTreeDef Active_BasicParasiteTree;
+        public static Talented.TalentTreeDef Passive_BasicParasiteTree;
 
 
         public static Talented.TreeDisplayStrategyDef VerticalStrategy;

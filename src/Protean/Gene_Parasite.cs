@@ -36,6 +36,10 @@ namespace Protean
 
         private StrainDef ChosenStrain = null;
 
+        public StrainDef GetChosenStrain()
+        {
+            return ChosenStrain;
+        }
 
         protected ParasiteGeneDef ParasiteGeneDef => (ParasiteGeneDef)def;
 
@@ -62,21 +66,11 @@ namespace Protean
             base.PostRemove();
         }
 
-        protected override void InitializeTrees()
-        {
-            passiveTree = new PassiveTreeHandler(pawn, this, TalentedGeneDef.SecondaryTreeDef);
-            activeTree = new ActiveTreeHandler(pawn, this, TalentedGeneDef.MainTreeDef);
-        }
-
         public override void OnExperienceGained(float amount, string source)
         {
 
         }
 
-        public override void OnLevelGained(int levels)
-        {
-
-        }
         public void SetSuitColor(Color newColor)
         {
             _SuitColor = newColor;
@@ -129,9 +123,6 @@ namespace Protean
 
             int newLevel = oldLevel + gainedLevels;
             bondLevel = Math.Min(newLevel, MaxBondLevel);
-
-            passiveTree?.OnLevelUp(bondLevel);
-            activeTree?.OnLevelUp(levels);
             Messages.Message($"{pawn.Label} gained {levels} bond level{(levels > 1 ? "s" : "")} with their parasite (level = {bondLevel})", MessageTypeDefOf.PositiveEvent);
         }
 
@@ -162,9 +153,6 @@ namespace Protean
         public override void ExposeData()
         {
             base.ExposeData();
-
-            Scribe_Deep.Look(ref passiveTree, "passiveTree");
-            Scribe_Deep.Look(ref activeTree, "activeTree");
 
             Scribe_Defs.Look(ref ChosenStrain, "chosenStrainDef");
 

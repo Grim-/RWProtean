@@ -13,6 +13,8 @@ namespace Protean
         public Vector3 westOffset = new Vector3(1, 0, 0);
         public GraphicData graphicData;
         public bool useBodyTypeVariants = false;
+        public float colorShiftSpeed = 1f;
+        public float colorShiftIntensity = 1f;
 
         public PawnOverlayNodeProperties()
         {

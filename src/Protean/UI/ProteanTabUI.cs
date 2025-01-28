@@ -55,19 +55,6 @@ namespace Protean
             var progressRect = new Rect(curX, rect.y + (rect.height - 18f) / 2f, progressWidth, 18f);
             Widgets.FillableBar(progressRect, Parasite.CurrentBondProgress);
             curX += progressWidth + padding;
-
-            // Tree Buttons
-            var passiveTreeRect = new Rect(rect.width - (buttonWidth * 2 + padding * 2), rect.y + padding, buttonWidth, rect.height - padding * 2);
-            if (Widgets.ButtonText(passiveTreeRect, "Passive Tree"))
-            {
-                Parasite.OpenPassiveTree();
-            }
-
-            var activeTreeRect = new Rect(rect.width - (buttonWidth + padding), rect.y + padding, buttonWidth, rect.height - padding * 2);
-            if (Widgets.ButtonText(activeTreeRect, "Active Tree"))
-            {
-                Parasite.OpenActiveTree();
-            }
         }
     }
 }
