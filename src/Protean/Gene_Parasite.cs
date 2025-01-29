@@ -112,7 +112,7 @@ namespace Protean
             if (levelsToGain > 0)
             {
                 currentBond = remainingBond;
-                GainBondLevel(levelsToGain);
+                GainLevel(levelsToGain);
             }
         }
 

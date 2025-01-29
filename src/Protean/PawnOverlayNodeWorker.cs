@@ -8,6 +8,15 @@ namespace Protean
     {
         private float animationProgress = 0f;
         private const float AnimationSpeed = 1f / 3000f;
+        protected int currentTicks = 0;
+        protected int colorShiftTicks = 300;
+        protected Color currentColor;
+        protected Color targetColor;
+        private float pulseAmount = 0.05f;
+        private float pulseSpeed = 1f;
+
+        private Gene_Parasite Parasite = null;
+
 
         public override void AppendDrawRequests(PawnRenderNode node, PawnDrawParms parms, List<PawnGraphicDrawRequest> requests)
         {
@@ -42,10 +51,7 @@ namespace Protean
 
 
 
-        protected int currentTicks = 0;
-        protected int colorShiftTicks = 300;
-        protected Color currentColor;
-        protected Color targetColor;
+
 
         public override MaterialPropertyBlock GetMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
         {
@@ -57,45 +63,74 @@ namespace Protean
             if (overlayNode == null) 
                 return matPropBlock;
 
-            Gene_Parasite parasite = parms.pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
-            if (parasite == null) 
+            if (Parasite == null)
+            {
+                Parasite = parms.pawn.genes.GetFirstGeneOfType<Gene_Parasite>();
+            }
+        
+            if (Parasite == null) 
                 return matPropBlock;
 
-            Color baseColor = (parasite != null && parasite.SuitColor != default(Color))
-                ? parasite.SuitColor
+            Color baseColor = (Parasite != null && Parasite.SuitColor != default(Color))
+                ? Parasite.SuitColor
                 : overlayNode.Props.overlayColor;
 
-            Color eyeColor = (parasite != null && parasite.EyeColor != default(Color))
-                ? parasite.EyeColor
+            Color eyeColor = (Parasite != null && Parasite.EyeColor != default(Color))
+                ? Parasite.EyeColor
                 : Color.white;
 
+
+            StrainDef strainDef = Parasite.GetChosenStrain();
 
             currentTicks++;
             if (currentTicks >= colorShiftTicks)
             {
                 currentTicks = 0;
                 currentColor = targetColor;
-                targetColor = new Color(Rand.Range(0f, 1f), Rand.Range(0f, 1f), Rand.Range(0f, 1f));
+
+                if (strainDef.possibleShiftColors != null && strainDef.possibleShiftColors.Count > 0)
+                {
+                    targetColor = strainDef.possibleShiftColors.RandomElement();
+                }
+                else
+                {
+                    targetColor = new Color(Rand.Range(0f, 1f), Rand.Range(0f, 1f), Rand.Range(0f, 1f));
+                }            
             }
 
-            float lerpAmount = (float)currentTicks / colorShiftTicks;
-            Color lerpedColor = Color.Lerp(currentColor, targetColor, lerpAmount);
+            Color lerpedColor = currentColor;
 
+            if (strainDef.canColorShift)
+            {
+                float lerpAmount = (float)currentTicks / colorShiftTicks;
+                lerpedColor = Color.Lerp(currentColor, targetColor, lerpAmount);
+            }
 
-            //float pulseAmount = (Mathf.Sin(Find.TickManager.TicksGame / 60f) + 1f) * 0.2f;
-            //lerpedColor *= (1f + pulseAmount);
+            if (strainDef.canPulsate)
+            {
+                float pulseAmount = (Mathf.Sin(Find.TickManager.TicksGame / 60f) + 1f) * 0.2f;
+                lerpedColor *= (1f + pulseAmount);
+            }
 
+            lerpedColor.a = overlayNode.Props.overlayAlpha;
 
-
-            float healthPercent = parms.pawn.health.summaryHealth.SummaryHealthPercent;
-            lerpedColor.a = Mathf.Lerp(0.2f, 1f, healthPercent);
-
-
-            //lerpedColor.a = overlayNode.Props.overlayAlpha;
+            if (strainDef.lerpAlphaWithHealth)
+            {
+                float healthPercent = parms.pawn.health.summaryHealth.SummaryHealthPercent;
+                lerpedColor.a *= Mathf.Lerp(strainDef.alphaHealthRange.min, strainDef.alphaHealthRange.max, healthPercent);
+            }
+     
             matPropBlock.SetColor(ShaderPropertyIDs.Color, parms.tint * lerpedColor);
             matPropBlock.SetColor(ShaderPropertyIDs.ColorTwo, parms.tint * eyeColor);
 
             return matPropBlock;
+        }
+
+        protected Color ColorShift(Color lerpedColor, PawnDrawParms parms)
+        {
+            float lerpAmount = (float)currentTicks / colorShiftTicks;
+            lerpedColor = Color.Lerp(currentColor, targetColor, lerpAmount);
+            return lerpedColor;
         }
 
         protected Color GetDirectionColorShift(Color lerpedColor, PawnDrawParms parms)
@@ -141,8 +176,7 @@ namespace Protean
             {
                 Vector2 baseSize = overlayNode.Props.graphicData.drawSize;
 
-                float pulseAmount = 0.05f;
-                float pulseSpeed = 1f;
+
                 float scaleFactor = 1.1f + (Mathf.Sin(Time.realtimeSinceStartup * pulseSpeed) * pulseAmount);
 
                 return new Vector3(
